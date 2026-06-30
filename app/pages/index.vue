@@ -1,9 +1,9 @@
 <template>
     <div class="min-h-screen bg-gray-50 w-full">        
         <div class="grid grid-cols-12 gap-0">
-            <div class="col-span-12 md:col-span-4 px-5 bg-gray-950 min-h-screen">
+            <div class="col-span-12 md:col-span-4 px-5 bg-gray-100 min-h-screen">
                 <div class="flex items-center justify-center h-full flex-col">
-                    <img src="/images/logo-yokohama.svg" alt="Yokohama Pneus" class="mb-12">
+                    <img src="/images/logo-fortune.webp" alt="Fortune Pneus" class="mb-12 max-w-62">
                     <FormsLogin />
                 </div>
             </div>
@@ -14,7 +14,11 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({
+    layout: 'default'
+})
+
 useHead({
-    title: 'Gestão - Yokohama Pneus',
+    title: 'Gestão - Fortune Pneus',
 })
 </script>

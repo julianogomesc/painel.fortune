@@ -33,9 +33,19 @@ export default defineNuxtConfig({
 
   ui: {
     theme: {
-      colors: ['redYoko', 'primary', 'secondary', 'success', 'error', 'warning', 'info', 'neutral', 'black', 'white']
+      colors: ['blueFortune', 'blueFortuneDark', 'primary', 'secondary', 'success', 'error', 'warning', 'info', 'neutral', 'black', 'white']
     },
     colorMode: false // Isso diz ao Nuxt UI para não tentar gerenciar o modo escuro
+  },
+
+  vite: {
+    optimizeDeps: {
+      include: [
+        '@vue/devtools-core',
+        '@vue/devtools-kit',
+        'zod'
+      ]
+    }
   },
 
   runtimeConfig: {

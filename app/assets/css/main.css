@@ -2,5 +2,6 @@
 @import "@nuxt/ui";
 
 @theme {
-    --color-redYoko: #ef1b2a;
+    --color-blueFortune: #0097e2;
+    --color-blueFortuneDark: #003C70;
 }

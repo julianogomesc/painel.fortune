@@ -22,3 +22,7 @@
 - Explicações: Máximo de 3 linhas por alteração, apenas em formato de tópicos.
 - Tipagem: Typescript. Evitar `any`.
 - Jamais altere arquivos sem autorização prévia.
+
+## documentação dos frameworks usados
+- NuxtUI: https://ui.nuxt.com/docs
+- Nuxt: https://nuxt.com/

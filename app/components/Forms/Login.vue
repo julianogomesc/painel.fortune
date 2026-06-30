@@ -1,24 +1,24 @@
 <template>
     <UForm :schema="schema" :state="state" @submit="onSubmit" class="w-full px-8 md:px-15 lg:px-25" v-if="!route.query.esqueceu_senha">
-        <UFormField label="E-mail*:" name="email" :ui="{ root: 'w-full mb-3', label: 'text-gray-50 px-2'}">
+        <UFormField label="E-mail*:" name="email" :ui="{ root: 'w-full mb-3', label: 'text-gray-700 px-2'}">
             <UInput v-model="state.email" type="email" class="w-full" size="xl" :disabled="pendingLogin" />
         </UFormField>
-        <UFormField label="Senha*:" name="password" :ui="{ root: 'w-full mb-3', label: 'text-gray-50 px-2'}">
+        <UFormField label="Senha*:" name="password" :ui="{ root: 'w-full mb-3', label: 'text-gray-700 px-2'}">
             <UInput v-model="state.password" :type="typeInput" class="w-full" size="xl" :disabled="pendingLogin" />
             <UButton :icon="!showPassword ? 'i-heroicons-eye' : 'i-heroicons-eye-slash'" class="absolute right-1 top-1 cursor-pointer" :ui="{ base: 'bg-neutral text-black hover:bg-neutral active:bg-neutral'}" @click="showEnabledPassword" :disabled="pendingLogin"></UButton>
         </UFormField>
         <div class="flex justify-between">
-            <a href="#" @click.prevent="forgetPassword(true)" class="text-gray-50 py-2 text-sm">Lembrar Senha?</a>
-            <UButton type="submit" label="Logar" color="redYoko" size="xl" :ui="{base: 'px-6 cursor-pointer'}" :disabled="pendingLogin" />
+            <a href="#" @click.prevent="forgetPassword(true)" class="text-gray-700 py-2 text-sm">Lembrar Senha?</a>
+            <UButton type="submit" label="Logar" color="blueFortune" size="xl" :ui="{base: 'px-6 cursor-pointer'}" :disabled="pendingLogin" />
         </div>
     </UForm>
     <UForm :schema="schemaForgetPass" :state="stateForgetPass" @submit="forgetPassSubmit" class="w-full px-8 md:px-15 lg:px-25" v-else>
-        <UFormField label="E-mail*:" name="email" :ui="{ root: 'w-full mb-3', label: 'text-gray-50 px-2'}">
+        <UFormField label="E-mail*:" name="email" :ui="{ root: 'w-full mb-3', label: 'text-gray-700 px-2'}">
             <UInput v-model="stateForgetPass.email" type="email" class="w-full" size="xl" />
         </UFormField>
         <div class="flex justify-between">
-            <a href="#" @click.prevent="forgetPassword(false)" class="text-gray-50 py-2 text-sm">Voltar ao Login</a>
-            <UButton type="submit" label="Recuperar Senha" color="redYoko" size="xl" :ui="{base: 'px-6 cursor-pointer'}" />
+            <a href="#" @click.prevent="forgetPassword(false)" class="text-gray-700 py-2 text-sm">Voltar ao Login</a>
+            <UButton type="submit" label="Recuperar Senha" color="blueFortune" size="xl" :ui="{base: 'px-6 cursor-pointer'}" />
         </div>
     </UForm>
 </template>
@@ -77,7 +77,7 @@ const formData = computed(() => {
     return fd
 })
 
-const { pending: pendingLogin, error: errorLogin, result: resultLogin, fetchResult: fetchLogin } = useApiRequests("/_painel/users/login", "POST", formData)
+const { pending: pendingLogin, error: errorLogin, result: resultLogin, fetchResult: fetchLogin } = useApiRequests("/_painel/users/login", "POST", formData, 'none', false)
 
 async function onSubmit(_event: FormSubmitEvent<Schema>) {
     await fetchLogin()

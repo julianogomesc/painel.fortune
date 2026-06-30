@@ -1,5 +1,6 @@
-export const useApiRequests = (endpoint: Ref<string> | string, method: string | Ref<string>, body?: Object, typeSend: 'formdata' | 'none' = 'none') => {
+export const useApiRequests = (endpoint: Ref<string> | string, method: string | Ref<string>, body?: Object, typeSend: 'formdata' | 'none' = 'none', auth: boolean = true) => {
     const config = useRuntimeConfig()
+    const store = useLoginStore()
 
     const pending = ref(false)
     const error = ref({})
@@ -30,6 +31,9 @@ export const useApiRequests = (endpoint: Ref<string> | string, method: string | 
                 key: `${txt.value.slice(0, 4)}-${methodVal.toLowerCase()}-${now}`,
                 baseURL: config.public.apiBase,
                 method: methodVal,
+                headers: auth && store.user.token ? {
+                    Authorization: `Bearer ${store.user.token}`
+                } : {},
                 body: methodVal == 'GET' ? undefined : typeSend == 'formdata' ? fd : body
             })
             result.value = data.value || {}

@@ -1,12 +1,21 @@
 <template>
-    Banners
+    Medidas
 </template>
 
 <script setup lang="ts">
+import type { layoutPageType } from '~/types/layoutPage';
+
 definePageMeta({
   layout: 'interna',
 })
 
-const titlePage = useState('titlePage', () => {return {title: 'Categorias', categorie: ''}})
-titlePage.value = {title: 'Categorias', categorie: 'Produtos'}
+const titlePage = useState<layoutPageType>('titlePage', () => {
+  return {
+    title: 'Medidas',
+    categorie: null,
+    description: null,
+    colorButton: null
+  }
+})
+titlePage.value = {title: 'Medidas', categorie: 'Produtos', description: 'Gerencie suas medidas de Pneus', textButton: 'Voltar', urlButton: '/produtos/medidas', colorButton: 'neutral'}
 </script>

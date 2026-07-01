@@ -8,30 +8,19 @@ const UButton = resolveComponent('UButton')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
 
 type Banners = {
-  image: string
+  imagem: string
   titulo: string
   situacao: '0' | '1'
   id: string
 }
 
-type ApiResponse = {
-  page: number
-  rows: number
-  total: number
-  data: Banners[]
-}
+const qtdeRows = ref(10)
 
-const page = ref(1)
-const rows = ref(10)
+const endpoint = computed(() => `_painel/banners/show`)
 
-const endpoint = computed(() => `_painel/banners/show?page=${page.value}&rows=${rows.value}`)
+const { fetchResult, pending, result, page, rows, total } = useApiRequestsPaginated(endpoint, qtdeRows.value)
 
-const { fetchResult, pending, result } = useApiRequests(endpoint, 'GET')
-
-const response = computed(() => result.value as ApiResponse)
-const data = computed<Banners[]>(() => response.value?.data || [])
-const total = computed(() => response.value?.total || 0)
-const totalPages = computed(() => Math.ceil(total.value / rows.value))
+const data = computed<Banners[]>(() => result.value as Banners[])
 
 watch(page, () => fetchResult())
 
@@ -46,10 +35,10 @@ const columns: TableColumn<Banners>[] = [
 //     cell: ({ row }) => `#${row.getValue('id')}`
 //   },
   {
-    accessorKey: 'image',
+    accessorKey: 'imagem',
     header: 'IMAGEM',
     cell: ({ row }) => {
-      return h('img', { src: row.getValue('image'), class: 'max-w-30 h-auto' })
+      return h('img', { src: row.getValue('imagem'), class: 'max-h-15 h-auto' })
     }
   },
   {
@@ -167,7 +156,7 @@ function getHeader(column: Column<Banners>, label: string) {
 
 const sorting = ref([
   {
-    id: 'id',
+    id: 'titulo',
     desc: false
   }
 ])
@@ -180,7 +169,7 @@ const sorting = ref([
     </template>
   </UTable>
 
-  <div v-if="totalPages > 1" class="flex justify-end mt-4">
+  <div v-if="total > qtdeRows" class="flex justify-end mt-4">
     <UPagination
       v-model:page="page"
       :total="total"

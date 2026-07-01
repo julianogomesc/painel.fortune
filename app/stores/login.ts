@@ -10,11 +10,12 @@ export const useLoginStore = defineStore('userLog', {
             this.user = {
                 expires_in: user.expires_in,
                 token: user.token,
-                data: user.user
+                user: user.user
             }
         },
         doLogout() {
-            this.user = {} as userType
+            this.$reset()
+            sessionStorage.removeItem('userLog')
         }
     },
     persist: {

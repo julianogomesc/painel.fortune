@@ -42,7 +42,7 @@ export const useApiRequests = (endpoint: Ref<string> | string, method: string | 
             }
         }
         catch (e) {
-            console.log(e)
+            // console.log(e)
             error.value = e || { title: 'Erro Inesperado no RQ Front' }
         }
         finally {
@@ -54,4 +54,64 @@ export const useApiRequests = (endpoint: Ref<string> | string, method: string | 
         fetchResult, pending, error, result
     }
 
+}
+
+export const useApiRequestsPaginated = (endpoint: Ref<string> | string, rowsQtde: number = 10, auth: boolean = true) => {
+    const config = useRuntimeConfig()
+    const store = useLoginStore()
+
+    const pending = ref(false)
+    const error = ref({})
+    const result = ref<any[]>([])
+    const page = ref(1)
+    const rows = ref(rowsQtde || 10)
+    const total = ref(0)
+
+    const fetchResult = async () => {
+        pending.value = true
+        error.value = {}
+
+        const now = new Date().getMilliseconds()
+
+        try {
+            const endpointStr = unref(endpoint)
+            const separator = endpointStr.includes('?') ? '&' : '?'
+            const urlWithParams = `${endpointStr}${separator}page=${page.value}&rows=${rows.value}`
+
+            const { data, error: fetchError } = await useFetch(urlWithParams, {
+                key: `${endpointStr.split('?')[0]?.slice(0, 4) || ''}-get-paginated-${now}`,
+                baseURL: config.public.apiBase,
+                method: 'GET',
+                headers: auth && store.user.token ? {
+                    Authorization: `Bearer ${store.user.token}`
+                } : {},
+            })
+
+            if (data.value) {
+                const res = data.value as any
+                page.value = res.page ?? page.value
+                rows.value = res.rows ?? rows.value
+                total.value = res.total ?? 0
+                result.value = res.data ?? []
+            } else {
+                result.value = []
+                total.value = 0
+            }
+
+            if (fetchError.value) {
+                error.value = toRaw(fetchError.value.data?.errors || fetchError.value.data)
+            }
+        }
+        catch (e) {
+            console.log(e)
+            error.value = e || { title: 'Erro Inesperado no RQ Front' }
+        }
+        finally {
+            pending.value = false
+        }
+    }
+
+    return {
+        fetchResult, pending, error, result, page, rows, total
+    }
 }

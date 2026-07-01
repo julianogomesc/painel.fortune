@@ -5,10 +5,19 @@
 </template>
 
 <script setup lang="ts">
+import type { layoutPageType } from '~/types/layoutPage';
+
 definePageMeta({
   layout: 'interna',
 })
 
-const titlePage = useState('titlePage', () => {return {title: 'Banners', categorie: null}})
-titlePage.value = {title: 'Banners', categorie: null}
+const titlePage = useState<layoutPageType>('titlePage', () => {
+  return {
+    title: 'Banners',
+    categorie: null,
+    description: null,
+    colorButton: null
+  }
+})
+titlePage.value = {title: 'Banners', categorie: null, description: 'Crie, edite e ou remova banners do site.', urlButton: '/banners/novo/0', textButton: 'Novo Banner'}
 </script>

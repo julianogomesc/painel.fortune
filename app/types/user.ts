@@ -1,7 +1,7 @@
 export interface userType {
     expires_in: number,
     token?: string,
-    data: {
+    user: {
         id: number,
         nome: string,
         email: string,

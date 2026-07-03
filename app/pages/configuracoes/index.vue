@@ -1,5 +1,5 @@
 <template>
-    Pneus
+    <ConfigurationsList />
 </template>
 
 <script setup lang="ts">

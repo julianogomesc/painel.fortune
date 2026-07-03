@@ -9,21 +9,22 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
 const UAvatarGroup = resolveComponent('UAvatarGroup')
 const UAvatar = resolveComponent('UAvatar')
 
-type Banners = {
-  imagem: string
-  imagem_mobile: string
-  titulo: string
+type Categorias = {
+  id: string | number
+  imagem?: string
+  descricao?: string
+  nome: string
+  slug: string
   situacao: '0' | '1'
-  id: string
 }
 
 const qtdeRows = ref(10)
 
-const endpoint = computed(() => `_painel/banners/show`)
+const endpoint = computed(() => `_painel/categorias/show`)
 
 const { fetchResult, pending, result, page, rows, total } = useApiRequestsPaginated(endpoint, qtdeRows.value)
 
-const data = computed<Banners[]>(() => result.value as Banners[])
+const data = computed<Categorias[]>(() => result.value as Categorias[])
 
 watch(page, () => fetchResult())
 
@@ -31,12 +32,7 @@ onMounted(() => {
   fetchResult()
 })
 
-const columns: TableColumn<Banners>[] = [
-//   {
-//     accessorKey: 'id',
-//     header: ({ column }) => getHeader(column, 'ID'),
-//     cell: ({ row }) => `#${row.getValue('id')}`
-//   },
+const columns: TableColumn<Categorias>[] = [
   {
     accessorKey: 'imagem',
     header: 'IMAGEM',
@@ -45,19 +41,15 @@ const columns: TableColumn<Banners>[] = [
         h(UAvatar, {
           src: row.getValue('imagem') as string,
           class: '-mr-4',
-          alt: `${row.original.titulo} (desktop)`
-        }),
-        h(UAvatar, {
-          src: row.original.imagem_mobile as string,
-          alt: `${row.original.titulo} (mobile)`
+          alt: `${row.original.nome} (desktop)`
         })
       ])
     }
 
   },
   {
-      accessorKey: 'titulo',
-      header: ({ column }) => getHeader(column, 'BANNER')
+      accessorKey: 'nome',
+      header: ({ column }) => getHeader(column, 'CATEGORIA')
     },
     {
       accessorKey: 'situacao',
@@ -90,7 +82,7 @@ const columns: TableColumn<Banners>[] = [
             label: 'Editar',
             icon: 'i-lucide-pencil',
             onSelect: () => {
-              navigateTo(`/banners/editar/${row.original.id}`)
+              navigateTo(`/produtos/categorias/editar/${row.original.id}`)
             }
           },
           {
@@ -118,19 +110,19 @@ const overlay = useOverlay()
 const confirmModal = overlay.create(ConfirmModal)
 const toast = useToast()
 
-async function deleteBanner(id: string) {
+async function deleteBanner(id: string | number) {
   const ok = await confirmModal.open({
-    title: 'Excluir Banner',
-    description: 'Deseja realmente excluir este banner?'
+    title: 'Excluir Categoria',
+    description: 'Deseja realmente excluir esta categoria?'
   })
 
   if (ok) {
-    const { fetchResult: fetchDelete, pending: pendingDelete } = useApiRequests(`/_painel/banners/${id}`, 'DELETE')
+    const { fetchResult: fetchDelete, pending: pendingDelete } = useApiRequests(`/_painel/categorias/${id}`, 'DELETE')
     await fetchDelete()
     if (!pendingDelete.value) {
       toast.add({
         title: 'Sucesso',
-        description: 'Banner excluído com sucesso!',
+        description: 'Categoria excluída com sucesso!',
         color: 'success',
         duration: 1300,
       })
@@ -139,7 +131,7 @@ async function deleteBanner(id: string) {
   } return
 }
 
-function getHeader(column: Column<Banners>, label: string) {
+function getHeader(column: Column<Categorias>, label: string) {
   const isSorted = column.getIsSorted()
 
   return h(
@@ -196,7 +188,7 @@ function getHeader(column: Column<Banners>, label: string) {
 
 const sorting = ref([
   {
-    id: 'titulo',
+    id: 'nome',
     desc: false
   }
 ])

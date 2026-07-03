@@ -1,5 +1,5 @@
 <template>
-    Categorias
+    <ListCategorias />
 </template>
 
 <script setup lang="ts">

@@ -9,6 +9,7 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
 
 type Banners = {
   imagem: string
+  imagem_mobile: string
   titulo: string
   situacao: '0' | '1'
   id: string
@@ -38,8 +39,19 @@ const columns: TableColumn<Banners>[] = [
     accessorKey: 'imagem',
     header: 'IMAGEM',
     cell: ({ row }) => {
-      return h('img', { src: row.getValue('imagem'), class: 'max-h-15 h-auto' })
+      return h(UAvatarGroup, { size: '3xl' }, () => [
+        h(UAvatar, {
+          src: row.getValue('imagem') as string,
+          class: '-mr-4',
+          alt: `${row.original.titulo} (desktop)`
+        }),
+        h(UAvatar, {
+          src: row.original.imagem_mobile as string,
+          alt: `${row.original.titulo} (mobile)`
+        })
+      ])
     }
+
   },
   {
       accessorKey: 'titulo',
@@ -84,7 +96,7 @@ const columns: TableColumn<Banners>[] = [
             icon: 'i-lucide-trash-2',
             color: 'error' as const,
             onSelect: () => {
-              console.log('Excluir', row.original.id)
+              deleteBanner(row.original.id)
             }
           }
         ]
@@ -98,6 +110,32 @@ const columns: TableColumn<Banners>[] = [
     }
   }
 ]
+
+import ConfirmModal from '~/components/ConfirmModal.vue'
+const overlay = useOverlay()
+const confirmModal = overlay.create(ConfirmModal)
+const toast = useToast()
+
+async function deleteBanner(id: string) {
+  const ok = await confirmModal.open({
+    title: 'Excluir Banner',
+    description: 'Deseja realmente excluir este banner?'
+  })
+
+  if (ok) {
+    const { fetchResult: fetchDelete, pending: pendingDelete } = useApiRequests(`/_painel/banners/${id}`, 'DELETE')
+    await fetchDelete()
+    if (!pendingDelete.value) {
+      toast.add({
+        title: 'Sucesso',
+        description: 'Banner excluído com sucesso!',
+        color: 'success',
+        duration: 1300,
+      })
+      fetchResult()
+    }
+  } return
+}
 
 function getHeader(column: Column<Banners>, label: string) {
   const isSorted = column.getIsSorted()
@@ -163,6 +201,7 @@ const sorting = ref([
 </script>
 
 <template>
+  <Loading v-if="pending" />
   <UTable v-model:sorting="sorting" :data="data" :columns="columns" :loading="pending" class="flex-1">
     <template #empty>
       <div class="text-center text-gray-400 py-0">Nenhum registro encontrado!</div>

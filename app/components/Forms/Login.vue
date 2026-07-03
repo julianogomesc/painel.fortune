@@ -87,17 +87,17 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
             description: errorLogin.value[0],
             icon: 'i-lucide-door-closed-locked',
             color: "error",
-            duration: 10000
+            duration: 1800
         })
     }
     else if (resultLogin.value.token){
         login.doLogin(resultLogin.value as userType)
         toast.add({
             title: "Login realizado com sucesso",
-            description: "Estamos lhe redirecionando...",
+            description: "Seja bem vindo ao seu painel!",
             icon: "i-lucide-door-open",
             color: "success",
-            duration: 10000
+            duration: 1800
         })
         navigateTo('/dashboard')
     }

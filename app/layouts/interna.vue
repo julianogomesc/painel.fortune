@@ -17,7 +17,7 @@
             </div>
 
             <!-- Context Title Column -->
-            <div class="col-span-12 md:col-span-3 lg:col-span-2 md:min-h-screen bg-gray-50 border-b md:border-b-0 md:border-r border-gray-200 py-5" v-if="route.path !== '/dashboard'">
+            <div class="col-span-12 md:col-span-3 lg:col-span-2 md:min-h-screen bg-gray-50 border-b md:border-b-0 md:border-r border-gray-200 py-5" v-if="route.name !== 'dashboard'">
                 <span v-if="titlePage.categorie" class="uppercase mx-5 text-blueFortune tracking-[0.1em] block text-[0.6em]">
                     {{ titlePage.categorie }} 
                 </span>

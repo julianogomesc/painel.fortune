@@ -5,15 +5,15 @@ const route = useRoute()
 const isEditing = computed(() => route.params.acao === 'editar' && route.params.id)
 const bannerId = computed(() => String(route.params.id) as string | undefined)
 
-const ALLOWED_TYPES = ['image/jpeg', 'image/png']
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg']
 
 const fileSchema = (label: string) =>
   z.instanceof(File, { message: `${label} é obrigatória` })
-    .refine(f => ALLOWED_TYPES.includes(f.type), `${label}: formato inválido (use jpg, jpeg ou png)`)
+    .refine(f => ALLOWED_TYPES.includes(f.type), `${label}: formato inválido (use webp, jpg, jpeg ou png)`)
 
 const schema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório').max(100, 'Máximo 100 caracteres'),
-//   descricao: z.string().optional(),
+  descricao: z.string().optional(),
   situacao: z.number().optional(),
   imagem: isEditing.value ? fileSchema('Imagem da categoria').optional() : fileSchema('Imagem da categoria').optional(),
 })
@@ -22,9 +22,9 @@ type Schema = z.output<typeof schema>
 
 const state = reactive<Partial<Schema>>({
   nome: '',
-//   descricao: '',
+  descricao: '',
   situacao: undefined,
-//   imagem: undefined
+  imagem: undefined
 })
 
 const emit = defineEmits<{ success: [] }>()
@@ -34,7 +34,7 @@ const { fetchResult, pending, error } = useApiRequests(
     computed(() => isEditing.value ? `/_painel/categorias/${bannerId.value}` : '/_painel/categorias'),
     computed(() => isEditing.value ? 'PUT' : 'POST'),
     state, 
-    // 'formdata'
+    'formdata'
 )
 
 const {
@@ -68,16 +68,16 @@ onBeforeUnmount(() => {
 function populateForm(){
     const data = categoryResult.value as {
         nome?: string,
-        // descricao?: string,
+        descricao?: string,
         situacao?: number,
-        // imagem?: string
+        imagem?: string
     }
     state.nome = data.nome ?? ''
-    // state.descricao ? state.descricao = data.descricao : null
+    state.descricao = data.descricao ?? ''
     state.situacao = data.situacao ?? undefined
-    // if(data.imagem){
-    //     previewImagem.value = data.imagem
-    // }
+    if(data.imagem){
+        previewImagem.value = data.imagem
+    }
 }
 
 async function onSubmit() {
@@ -95,19 +95,19 @@ async function onSubmit() {
         <div class="col-span-12 mb-1">
             <h2 class="font-bold text-2xl uppercase text-blueFortune">{{route.params.acao == 'nova' ? 'Nova Categoria' : 'Editar Categoria'}}</h2>
         </div>
-        <div class="col-span-12 md:col-span-5">
+        <div class="col-span-12 md:col-span-7">
             <UFormField label="Nome:" name="nome" required>
               <UInput v-model="state.nome" maxlength="50" placeholder="Nome da categoria" class="w-full" />
             </UFormField>
         </div>
-        <!-- <div :class="['col-span-7', route.params.acao !== 'nova' && 'md:col-span-5']">
-            <UFormField label="Descrição:" name="descricao">
-              <UInput v-model="state.descricao" placeholder="Descrição da categoria" class="w-full" />
-            </UFormField>
-        </div> -->
         <div class="col-span-5 md:col-span-2" v-if="route.params.acao !== 'nova'">
-            <UFormField label="Status:" name="situacao">
-                <USwitch v-model="state.situacao" :true-value="1" :false-value="0" unchecked-icon="i-lucide-x" checked-icon="i-lucide-check" />
+          <UFormField label="Status:" name="situacao">
+            <USwitch v-model="state.situacao" :true-value="1" :false-value="0" unchecked-icon="i-lucide-x" checked-icon="i-lucide-check" />
+          </UFormField>
+        </div>
+        <div class="col-span-12">
+            <UFormField label="Descrição:" name="descricao">
+              <UTextarea v-model="state.descricao" placeholder="Breve introdução da categoria" class="w-full" />
             </UFormField>
         </div>
         <div class="col-span-12 ">

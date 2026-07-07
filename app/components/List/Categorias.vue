@@ -19,12 +19,32 @@ type Categorias = {
 }
 
 const qtdeRows = ref(10)
+const termSearch = ref('')
 
 const endpoint = computed(() => `_painel/categorias/show`)
 
+function handleSearch(value: string) {
+  termSearch.value = value
+
+  if (!value.trim()) {
+    searchData.value = []
+    void fetchResult()
+    return
+  }
+
+  void searchCategories(value)
+}
+
 const { fetchResult, pending, result, page, rows, total } = useApiRequestsPaginated(endpoint, qtdeRows.value)
 
-const data = computed<Categorias[]>(() => result.value as Categorias[])
+const searchData = ref<Categorias[]>([])
+const data = computed<Categorias[]>(() => {
+  if (termSearch.value.trim()) {
+    return searchData.value
+  }
+
+  return result.value as Categorias[]
+})
 
 watch(page, () => fetchResult())
 
@@ -186,6 +206,24 @@ function getHeader(column: Column<Categorias>, label: string) {
   )
 }
 
+async function searchCategories(term = termSearch.value.trim()) {
+  if (!term) {
+    searchData.value = []
+    await fetchResult()
+    return
+  }
+
+  const { fetchResult: fetchSearch, result: searchResult } = useApiRequests(
+    `/_painel/categorias/show?page=1&rows=10&search=${encodeURIComponent(term)}`,
+    'GET'
+  )
+
+  await fetchSearch()
+
+  const payload = searchResult.value as { data?: Categorias[] } | Categorias[]
+  searchData.value = Array.isArray(payload) ? payload : payload?.data ?? []
+}
+
 const sorting = ref([
   {
     id: 'nome',
@@ -196,6 +234,11 @@ const sorting = ref([
 
 <template>
   <Loading v-if="pending" />
+  <div class="grid grid-cols-12 gap-2 mb-3">
+    <div class="col-span-12 lg:col-span-4 lg:col-start-9 relative">
+      <InputSearch @search="handleSearch" />
+    </div>
+  </div>
   <UTable v-model:sorting="sorting" :data="data" :columns="columns" :loading="pending" class="flex-1">
     <template #empty>
       <div class="text-center text-gray-400 py-0">Nenhum registro encontrado!</div>

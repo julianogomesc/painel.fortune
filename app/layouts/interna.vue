@@ -2,7 +2,7 @@
     <div class="max-w-full md:min-h-screen bg-gray-50 flex flex-col md:flex-row">
         <!-- Mobile Header -->
         <div class="flex items-center justify-between md:hidden bg-gray-100 border-b border-gray-200 px-4 py-3 sticky top-0 z-40 w-full">
-            <img src="/images/logo-fortune.webp" alt="Fortune Pneus" class="max-w-36">
+            <img src="/images/logo-fortune.webp" alt="Fortune Pneus" class="max-w-36 w-full">
             <MenuLeft :mobile="true" />
         </div>
 
@@ -10,7 +10,7 @@
             <!-- Desktop Sidebar -->
             <div class="hidden md:block md:col-span-3 lg:col-span-2 bg-gray-100 min-h-screen px-3 relative border-r border-gray-200">
                 <div class="block mb-3 pb-4 mt-4 border-b border-gray-200">
-                    <img src="/images/logo-fortune.webp" alt="Fortune Pneus" class="max-w-44 mx-2">
+                    <img src="/images/logo-fortune.webp" alt="Fortune Pneus" class="max-w-44 w-full mx-2">
                 </div>
                 <MenuLeft />
                 <LogoutConfig />
@@ -18,7 +18,7 @@
 
             <!-- Context Title Column -->
             <div class="col-span-12 md:col-span-3 lg:col-span-2 md:min-h-screen bg-gray-50 border-b md:border-b-0 md:border-r border-gray-200 py-5" v-if="route.name !== 'dashboard'">
-                <span v-if="titlePage.categorie" class="uppercase mx-5 text-blueFortune tracking-[0.1em] block text-[0.6em]">
+                <span v-if="titlePage.categorie" class="uppercase mx-5 text-blueFortune tracking-widest block text-[0.6em]">
                     {{ titlePage.categorie }} 
                 </span>
                 <h1 :class="['mx-5 font-medium uppercase text-2xl text-blueFortuneDark tracking-tight', titlePage.categorie ? 'mt-0' : '']">{{ titlePage.title }}</h1>

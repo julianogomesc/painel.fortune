@@ -19,11 +19,49 @@ type Banners = {
 
 const qtdeRows = ref(10)
 
+const termSearch = ref('')
+function handleSearch(value: string) {
+  termSearch.value = value
+
+  if (!value.trim()) {
+    searchData.value = []
+    void fetchResult()
+    return
+  }
+
+  void searchBanners(value)
+}
+
 const endpoint = computed(() => `_painel/banners/show`)
 
 const { fetchResult, pending, result, page, rows, total } = useApiRequestsPaginated(endpoint, qtdeRows.value)
 
-const data = computed<Banners[]>(() => result.value as Banners[])
+const searchData = ref<Banners[]>([])
+const data = computed<Banners[]>(() => {
+  if (termSearch.value.trim()) {
+    return searchData.value
+  }
+
+  return result.value as Banners[]
+})
+
+async function searchBanners(term = termSearch.value.trim()) {
+  if (!term) {
+    searchData.value = []
+    await fetchResult()
+    return
+  }
+
+  const { fetchResult: fetchSearch, result: searchResult } = useApiRequests(
+    `/_painel/banners/show?page=1&rows=10&search=${encodeURIComponent(term)}`,
+    'GET'
+  )
+
+  await fetchSearch()
+
+  const payload = searchResult.value as { data?: Banners[] } | Banners[]
+  searchData.value = Array.isArray(payload) ? payload : payload?.data ?? []
+}
 
 watch(page, () => fetchResult())
 
@@ -204,6 +242,11 @@ const sorting = ref([
 
 <template>
   <Loading v-if="pending" />
+  <div class="grid grid-cols-12 gap-2 mb-3">
+    <div class="col-span-12 lg:col-span-4 lg:col-start-9 relative">
+      <InputSearch @search="handleSearch" />
+    </div>
+  </div>
   <UTable v-model:sorting="sorting" :data="data" :columns="columns" :loading="pending" class="flex-1">
     <template #empty>
       <div class="text-center text-gray-400 py-0">Nenhum registro encontrado!</div>

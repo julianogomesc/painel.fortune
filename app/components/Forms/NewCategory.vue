@@ -27,15 +27,58 @@ const state = reactive<Partial<Schema>>({
   imagem: undefined
 })
 
+const hasImageFile = computed(() => state.imagem instanceof File || String(state.imagem) === '[object File]')
+const categoryPayload = computed(() => ({
+  nome: state.nome,
+  descricao: state.descricao,
+  situacao: state.situacao,
+}))
+const imagePayload = computed(() => ({
+  imagem: state.imagem,
+}))
+const hasFieldChanges = computed(() => {
+  if (!isEditing.value || !categoryResult.value || typeof categoryResult.value !== 'object') return false
+
+  const currentCategory = categoryResult.value as {
+    nome?: string,
+    descricao?: string,
+    situacao?: number,
+  }
+
+  return state.nome !== (currentCategory.nome ?? '')
+    || state.descricao !== (currentCategory.descricao ?? '')
+    || state.situacao !== (currentCategory.situacao ?? undefined)
+})
+
 const emit = defineEmits<{ success: [] }>()
 
-// const { fetchResult, pending, error } = useApiRequests('/banners', 'POST', state, 'formdata')
-const { fetchResult, pending, error } = useApiRequests(
-    computed(() => isEditing.value ? `/_painel/categorias/${bannerId.value}` : '/_painel/categorias'),
-    computed(() => isEditing.value ? 'PUT' : 'POST'),
-    state, 
-    'formdata'
+const { fetchResult: fetchCreateCategory, pending: pendingCreateCategory, error: createCategoryError } = useApiRequests(
+  '/_painel/categorias',
+  'POST',
+  state,
+  'formdata'
 )
+
+const { fetchResult: fetchCategoryUpdate, pending: pendingCategoryUpdate, error: categoryUpdateError } = useApiRequests(
+  computed(() => `/_painel/categorias/${bannerId.value}`),
+  'PUT',
+  categoryPayload,
+  'formdata'
+)
+
+const { fetchResult: fetchCategoryImage, pending: pendingCategoryImage, error: categoryImageError } = useApiRequests(
+  computed(() => `/_painel/categorias/imagem/${bannerId.value}`),
+  'POST',
+  imagePayload,
+  'formdata'
+)
+
+const pending = computed(() => pendingCreateCategory.value || pendingCategoryUpdate.value || pendingCategoryImage.value)
+const error = computed(() => ({
+  ...createCategoryError.value,
+  ...categoryUpdateError.value,
+  ...categoryImageError.value,
+}))
 
 const {
     fetchResult: fetchCategory,
@@ -81,8 +124,30 @@ function populateForm(){
 }
 
 async function onSubmit() {
-  await fetchResult()
-  if (!Object.keys(error.value).length) {
+  if (isEditing.value) {
+    const shouldUpdateFields = hasFieldChanges.value
+    const shouldUploadImage = hasImageFile.value
+
+    if (shouldUpdateFields) {
+      await fetchCategoryUpdate()
+      if (Object.keys(categoryUpdateError.value).length) {
+        return
+      }
+    }
+
+    if (shouldUploadImage) {
+      await fetchCategoryImage()
+      if (Object.keys(categoryImageError.value).length) {
+        return
+      }
+    }
+
+    emit('success')
+    return
+  }
+
+  await fetchCreateCategory()
+  if (!Object.keys(createCategoryError.value).length) {
     emit('success')
   }
 }
@@ -111,6 +176,7 @@ async function onSubmit() {
             </UFormField>
         </div>
         <div class="col-span-12 ">
+        <!-- <pre>{{ state }}</pre> -->
             <UFormField label="Imagem:" name="imagem">
                 <div class="flex items-center gap-3">
                     <img v-if="previewImagem" :src="previewImagem" class="h-12 w-12 object-cover rounded">

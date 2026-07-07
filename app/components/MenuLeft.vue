@@ -113,7 +113,7 @@ const items = [
             <div>
               <!-- Header inside Drawer -->
               <div class="flex items-center justify-between pb-4 mb-6 border-b border-gray-200">
-                <img src="/images/logo-fortune.webp" alt="Fortune Pneus" class="max-w-36">
+                <img src="/images/logo-fortune.webp" alt="Fortune Pneus" class="max-w-36 w-auto">
                 <UButton
                   icon="i-lucide-x"
                   color="neutral"

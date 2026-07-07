@@ -1,4 +1,4 @@
-export const useApiRequests = (endpoint: Ref<string> | string, method: string | Ref<string>, body?: Object, typeSend: 'formdata' | 'none' = 'none', auth: boolean = true) => {
+export const useApiRequests = (endpoint: Ref<string> | string, method: string | Ref<string>, body?: Record<string, unknown> | Ref<Record<string, unknown>> | FormData, typeSend: 'formdata' | 'none' = 'none', auth: boolean = true) => {
     const config = useRuntimeConfig()
     const store = useLoginStore()
 
@@ -15,10 +15,13 @@ export const useApiRequests = (endpoint: Ref<string> | string, method: string | 
 
         const fd = new FormData()
         if (typeSend == 'formdata') {
+            const payload = unref(body as Record<string, unknown> | Ref<Record<string, unknown>> | undefined)
 
-            for (const [key, value] of Object.entries(body || {})) {
-                if (value != null && value != undefined) {
-                    fd.append(key, value instanceof Blob ? value : String(value))
+            if (payload && typeof payload === 'object' && !(payload instanceof FormData)) {
+                for (const [key, value] of Object.entries(payload)) {
+                    if (value != null && value != undefined) {
+                        fd.append(key, value instanceof Blob ? value : String(value))
+                    }
                 }
             }
         }

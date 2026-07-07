@@ -15,6 +15,7 @@
 
 <script setup lang="ts">
 import type { TabsItem } from '@nuxt/ui'
+const loginStore = useLoginStore()
 
 const items = [
     {
@@ -27,11 +28,12 @@ const items = [
         icon: 'i-lucide-lock',
         slot: 'password' as const,
     },
+    loginStore.user?.user?.perfil === 1 ? 
     {
         label: 'Ger. Usuários',
         icon: 'i-lucide-users',
         slot: 'users' as const,
-    }
+    } : {}
 ] satisfies TabsItem[]
 
 </script>

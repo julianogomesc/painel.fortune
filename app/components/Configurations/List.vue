@@ -1,7 +1,7 @@
 <template>
-    <UTabs :items="items" variant="link" :ui="{trigger: 'grow'}" class="gap-4 w-full">
+    <UTabs :items="items" variant="link" :ui="{trigger: 'grow'}" color="blueFortune" class="gap-4 w-full">
         <template #profile>
-            <ConfigurationsProfile />
+            <ConfigurationsProfile :isEditing="true" />
         </template>
         <template #password>
             <!-- <ChangePassword /> -->

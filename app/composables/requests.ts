@@ -37,7 +37,8 @@ export const useApiRequests = (endpoint: Ref<string> | string, method: string | 
                 headers: auth && store.user.token ? {
                     Authorization: `Bearer ${store.user.token}`
                 } : {},
-                body: methodVal == 'GET' ? undefined : typeSend == 'formdata' ? fd : body
+                body: methodVal == 'GET' ? undefined : typeSend == 'formdata' ? fd : body,
+                watch: false
             })
             result.value = data.value || {}
             if (fetchError.value) {

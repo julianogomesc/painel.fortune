@@ -1,13 +1,13 @@
 <template>
     <UTabs :items="items" variant="link" :ui="{trigger: 'grow'}" color="blueFortune" class="gap-4 w-full">
         <template #profile>
-            <ConfigurationsProfile :isEditing="true" />
+            <ConfigurationsProfile />
         </template>
         <template #password>
-            <!-- <ChangePassword /> -->
+            <ConfigurationsChangePass />
         </template>
         <template #users>
-            <!-- <UsersList /> -->
+            <ConfigurationsUsers />
         </template>
     </UTabs>
 

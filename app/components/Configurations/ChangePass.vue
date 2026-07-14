@@ -2,11 +2,23 @@
     <Loading v-if="pending" />
     <UForm :schema="schema" :state="data" @submit="updateData" class="w-full">
         <div class="px-4 my-5">
-            <div class="grid grid-cols-12 gap-4" v-if="!props.isEditing">
+            <div class="grid grid-cols-12 gap-4">
                 <div class="col-span-12 lg:col-span-3 mb-3">
-                    <UFormField label="Senha*:" name="password" :ui="{ root: 'w-full mb-3', label: 'text-gray-700 px-2'}">
-                        <UInput :type="showPass ? 'text' : 'password'" v-model="data.password" class="w-full" />
-                        <UButton :icon="!showPass ? 'i-lucide-eye' : 'i-lucide-eye-off'" class="cursor-pointer" @click="showPass = !showPass" :ui="{base: 'text-gray-600 bg-transparent absolute right-1 hover:bg-transparent'}" />
+                    <UFormField label="Senha Atual*:" name="password" :ui="{ root: 'w-full mb-3', label: 'text-gray-700 px-2'}">
+                        <UInput :type="showPass.password ? 'text' : 'password'" v-model="data.password" class="w-full" />
+                        <UButton :icon="!showPass.password ? 'i-lucide-eye' : 'i-lucide-eye-off'" class="cursor-pointer" @click="showP('password')" :ui="{base: 'text-gray-600 active:bg-transparent disabled:bg-transparent bg-transparent absolute right-1 hover:bg-transparent'}" />
+                    </UFormField>
+                </div>
+                <div class="col-span-12 lg:col-span-3 mb-3">
+                    <UFormField label="Nova Senha*:" name="new_password" :ui="{ root: 'w-full mb-3', label: 'text-gray-700 px-2'}">
+                        <UInput :type="showPass.new_password ? 'text' : 'password'" v-model="data.new_password" class="w-full" />
+                        <UButton :icon="!showPass.new_password ? 'i-lucide-eye' : 'i-lucide-eye-off'" class="cursor-pointer" @click="showP('new_password')" :ui="{base: 'text-gray-600 active:bg-transparent disabled:bg-transparent bg-transparent absolute right-1 hover:bg-transparent'}" />
+                    </UFormField>
+                </div>
+                <div class="col-span-12 lg:col-span-3 mb-3">
+                    <UFormField label="Confirmar Senha*:" name="confirm_new_password" :ui="{ root: 'w-full mb-3', label: 'text-gray-700 px-2'}">
+                        <UInput :type="showPass.confirm_new_password ? 'text' : 'password'" v-model="data.confirm_new_password" class="w-full" />
+                        <UButton :icon="!showPass.confirm_new_password ? 'i-lucide-eye' : 'i-lucide-eye-off'" class="cursor-pointer" @click="showP('confirm')" :ui="{base: 'text-gray-600 active:bg-transparent disabled:bg-transparent bg-transparent absolute right-1 hover:bg-transparent'}" />
                     </UFormField>
                 </div>
             </div>
@@ -21,19 +33,12 @@
 
 <script setup lang="ts">
 
-const props = defineProps({
-    isEditing: {
-        default: false
-    }
-})
-
 const showPass = reactive({
     password: false,
     new_password: false,
     confirm_new_password: false,
 })
 
-const {user} = useLoginStore()
 import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui';
 
@@ -57,55 +62,33 @@ const data = reactive<Dados>({
     confirm_new_password: '',
 })
 
-onMounted(async () => {
-    data.password = user.user?.nome
-    data.new_password = user.user?.email
-    data.confirm_new_password = user.user?.perfil
-})
+function showP(item: String){
+    if(item == 'password'){
+        showPass.password = !showPass.password
+    }
+    if(item == 'new_password'){
+        showPass.new_password = !showPass.new_password
+    }
+    if(item == 'confirm'){
+        showPass.confirm_new_password = !showPass.confirm_new_password
+    }
+}
 
 const toast = useToast()
-const login = useLoginStore()
 
-const method = computed(() => props.isEditing ? 'PUT' : 'POST')
-const endpoint = computed(() => props.isEditing ? `/_painel/users/${user.user?.id}` : '/_painel/users')
-
-props.isEditing ? delete data.password : null
+const endpoint = `/_painel/users/password`
 
 const { pending, error, result, fetchResult } = useApiRequests(
     endpoint,
-    method,
+    'PUT',
     data,
-    props.isEditing ? 'none' : 'formdata'
+    'none'
 )
-
-
-type UserPayload = {
-  id: number
-  nome: string
-  email: string
-  perfil: number
-  situacao: number
-  password?: string
-}
-
-function isUserPayload(value: unknown): value is UserPayload {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
-
-  const v = value as Record<string, unknown>
-
-  return (
-    typeof v.id === 'number' &&
-    typeof v.nome === 'string' &&
-    typeof v.email === 'string' &&
-    typeof v.perfil === 'number' &&
-    typeof v.situacao === 'number'
-  )
-}
 
 async function updateData(_event: FormSubmitEvent<Schema>) {
   await fetchResult()
 
-  if (error.value[0]) {
+  if (Array.isArray(error.value)) {
     toast.add({
       title: "Erro",
       description: error.value[0],
@@ -113,16 +96,8 @@ async function updateData(_event: FormSubmitEvent<Schema>) {
       color: "error",
       duration: 1800
     })
-  } else if (isUserPayload(result.value)) {
-    const updatedUser = {
-        id: result.value.id,
-        nome: result.value.nome,
-        email: result.value.email,
-        perfil: result.value.perfil,
-        situacao: result.value.situacao
-    }
-    login.updateLoginData(updatedUser)
-
+  } else if (result.value) {
+    console.log(result.value)
     toast.add({
       title: "Sucesso",
       description: "Dados salvos com sucesso!",

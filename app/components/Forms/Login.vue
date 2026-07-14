@@ -5,7 +5,7 @@
         </UFormField>
         <UFormField label="Senha*:" name="password" :ui="{ root: 'w-full mb-3', label: 'text-gray-700 px-2'}">
             <UInput v-model="state.password" :type="typeInput" class="w-full" size="xl" :disabled="pendingLogin" />
-            <UButton :icon="!showPassword ? 'i-heroicons-eye' : 'i-heroicons-eye-slash'" class="absolute right-1 top-1 cursor-pointer" :ui="{ base: 'bg-neutral text-black hover:bg-neutral active:bg-neutral'}" @click="showEnabledPassword" :disabled="pendingLogin"></UButton>
+            <UButton :icon="!showPassword ? 'i-heroicons-eye' : 'i-heroicons-eye-slash'" class="absolute right-1 top-1 cursor-pointer" :ui="{ base: 'bg-neutral text-black active:bg-transparent disabled:bg-transparent hover:bg-neutral active:bg-neutral'}" @click="showEnabledPassword" :disabled="pendingLogin"></UButton>
         </UFormField>
         <div class="flex justify-between">
             <a href="#" @click.prevent="forgetPassword(true)" class="text-gray-700 py-2 text-sm">Lembrar Senha?</a>
@@ -81,7 +81,7 @@ const { pending: pendingLogin, error: errorLogin, result: resultLogin, fetchResu
 
 async function onSubmit(_event: FormSubmitEvent<Schema>) {
     await fetchLogin()
-    if(errorLogin.value[0]) {
+    if(Array.isArray(errorLogin.value)) {
         toast.add({
             title: "Erro no login",
             description: errorLogin.value[0],
@@ -90,15 +90,15 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
             duration: 1800
         })
     }
-    else if (resultLogin.value.token){
+    else if (resultLogin.value){
         login.doLogin(resultLogin.value as userType)
-        toast.add({
-            title: "Login realizado com sucesso",
-            description: "Seja bem vindo ao seu painel!",
-            icon: "i-lucide-door-open",
-            color: "success",
-            duration: 1800
-        })
+        // toast.add({
+        //     title: "Login realizado com sucesso",
+        //     description: "Seja bem vindo ao seu painel!",
+        //     icon: "i-lucide-door-open",
+        //     color: "success",
+        //     duration: 1800
+        // })
         navigateTo('/dashboard')
     }
 }

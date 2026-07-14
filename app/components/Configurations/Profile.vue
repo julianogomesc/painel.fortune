@@ -3,40 +3,43 @@
     <UForm :schema="schema" :state="data" @submit="updateData" class="w-full">
         <div class="px-4 my-5">
             <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-12 lg:col-span-3 mb-3">
-                    <UFormField label="Nome*:" name="nome" :ui="{ root: 'w-full mb-3', label: 'text-gray-700 px-2'}">
-                        <UInput v-model="data.nome" class="w-full" />
-                    </UFormField>
+                <div class="col-span-12 lg:col-span-3 mb-3 text-center">
+                    <UAvatar class="rounded-none squircle" src="/images/nopicture.jpg" alt="Benjamin Canac" loading="lazy" size="4xl" />
+                    <div class="-mt-4 mb-3 relative z-50">
+                        <UTooltip text="Excluir Imagem">
+                            <UButton icon="i-lucide-trash" class="mr-2 cursor-pointer" variant="solid" color="error" />
+                        </UTooltip>
+                        <UTooltip text="Alterar Imagem">
+                            <UButton icon="i-lucide-image-up" class="cursor-pointer" variant="solid" color="blueFortuneDark" />
+                        </UTooltip>
+                    </div>
                 </div>
-                <div class="col-span-12 lg:col-span-4 mb-3">
-                    <UFormField label="E-mail*:" name="email" type="email" :ui="{ root: 'w-full mb-3', label: 'text-gray-700 px-2'}">
-                        <UInput v-model="data.email" class="w-full" />
-                    </UFormField>
-                </div>
-            </div>
-            <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-12 lg:col-span-3 mb-3">
-                    <UFormField label="Perfil*:" name="perfil" :ui="{ root: 'w-full mb-3', label: 'text-gray-700 px-2'}">
-                        <USelect v-model="data.perfil" class="w-full" :items="perfis" :disabled="user.user?.perfil == 0" />
-                    </UFormField>
-                </div>
-                <div class="col-span-12 lg:col-span-4 mb-3">
-                    <UFormField label="Status*:" name="situacao" :ui="{ root: 'w-full mb-3', label: 'text-gray-700 px-2'}">
-                        <USwitch v-model="data.situacao" :true-value="1" :false-value="0" unchecked-icon="i-lucide-x" checked-icon="i-lucide-check" color="blueFortune" class="mt-1" :disabled="user.user?.perfil == 0" />
-                    </UFormField>
-                </div>
-            </div>
-            <div class="grid grid-cols-12 gap-4" v-if="!props.isEditing">
-                <div class="col-span-12 lg:col-span-3 mb-3">
-                    <UFormField label="Senha*:" name="password" :ui="{ root: 'w-full mb-3', label: 'text-gray-700 px-2'}">
-                        <UInput :type="showPass ? 'text' : 'password'" v-model="data.password" class="w-full" />
-                        <UButton :icon="!showPass ? 'i-lucide-eye' : 'i-lucide-eye-off'" class="cursor-pointer" @click="showPass = !showPass" :ui="{base: 'text-gray-600 bg-transparent absolute right-1 hover:bg-transparent'}" />
-                    </UFormField>
-                </div>
-            </div>
-            <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-12 lg:col-span-7 ">
-                    <UButton type="submit" label="Salvar" color="blueFortune" size="md" :ui="{base: 'px-4 cursor-pointer'}" />
+                <div class="col-span-12 lg:col-span-9 mb-3">
+                    <div class="grid grid-cols-12 gap-4">
+                        <div class="col-span-12">
+                            <UFormField label="Nome*:" name="nome" :ui="{ root: 'w-full', label: 'text-gray-700 px-2'}">
+                                <UInput v-model="data.nome" class="w-full" />
+                            </UFormField>
+                        </div>
+                        <div class="col-span-12">
+                            <UFormField label="E-mail*:" name="email" type="email" :ui="{ root: 'w-full', label: 'text-gray-700 px-2'}">
+                                <UInput v-model="data.email" class="w-full" />
+                            </UFormField>
+                        </div>
+                        <div class="col-span-12 lg:col-span-4">
+                            <UFormField label="Perfil*:" name="perfil" :ui="{ root: 'w-full mb-2', label: 'text-gray-700 px-2'}">
+                                <USelect v-model="data.perfil" class="w-full" :items="perfis" :disabled="user.user?.perfil == 0" />
+                            </UFormField>
+                        </div>
+                        <div class="col-span-12 lg:col-span-4">
+                            <UFormField label="Status*:" name="situacao" :ui="{ root: 'w-full mb-2', label: 'text-gray-700'}">
+                                <USwitch v-model="data.situacao" :true-value="1" :false-value="0" unchecked-icon="i-lucide-x" checked-icon="i-lucide-check" color="blueFortune" class="mt-2" :disabled="user.user?.perfil == 0" />
+                            </UFormField>
+                        </div>
+                        <div class="col-span-12 lg:col-span-7 ">
+                            <UButton type="submit" label="Salvar" color="blueFortune" size="md" :ui="{base: 'px-4 cursor-pointer'}" />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -45,14 +48,6 @@
 
 <script setup lang="ts">
 
-const props = defineProps({
-    isEditing: {
-        default: false
-    }
-})
-
-const showPass = ref(false)
-
 const {user} = useLoginStore()
 import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui';
@@ -60,17 +55,15 @@ import type { FormSubmitEvent } from '@nuxt/ui';
 interface Dados {
     nome: string
     email: string
-    perfil: number
-    situacao: number
-    password: string | undefined
+    perfil: 0 | 1
+    situacao: 0 | 1
 }
 
 const schema = z.object({
   nome: z.string().min(1, 'Nome é obrigatório').max(255, 'Máximo 255 caracteres'),
   email: z.string().min(1, 'Informe o e-mail').email("Informe um e-mail válido"),
   perfil: z.union([z.literal(0), z.literal(1)]),
-  situacao: z.union([z.literal(0), z.literal(1)]),
-  password: props.isEditing ? z.string().optional() : z.string().min(8, 'A senha deve conter pelo menos 8 caracteres').max(16, 'A senha deve contar no máx. 16 caracteres')
+  situacao: z.union([z.literal(0), z.literal(1)])
 })
 
 type Schema = z.output<typeof schema>
@@ -80,8 +73,9 @@ const data = reactive<Dados>({
     email: '',
     perfil: 0,
     situacao: 0,
-    password: '',
 })
+
+const imagem = ref('')
 
 const perfis = ref([
     {value: 0, label: 'Operador'},
@@ -91,25 +85,22 @@ const perfis = ref([
 onMounted(async () => {
     data.nome = user.user?.nome
     data.email = user.user?.email
-    data.perfil = user.user?.perfil
-    data.situacao = user.user?.situacao
+    data.perfil = Number(user.user?.perfil) as 0 | 1
+    data.situacao = Number(user.user?.situacao) as 0 | 1
 })
 
 const toast = useToast()
 const login = useLoginStore()
 
-const method = computed(() => props.isEditing ? 'PUT' : 'POST')
-const endpoint = computed(() => props.isEditing ? `/_painel/users/${user.user?.id}` : '/_painel/users')
-
-props.isEditing ? delete data.password : null
+const method = 'PUT'
+const endpoint = `/_painel/users/${user.user?.id}`
 
 const { pending, error, result, fetchResult } = useApiRequests(
     endpoint,
     method,
     data,
-    props.isEditing ? 'none' : 'formdata'
+    'none'
 )
-
 
 type UserPayload = {
   id: number
@@ -137,7 +128,7 @@ function isUserPayload(value: unknown): value is UserPayload {
 async function updateData(_event: FormSubmitEvent<Schema>) {
   await fetchResult()
 
-  if (error.value[0]) {
+  if (Array.isArray(error.value)) {
     toast.add({
       title: "Erro",
       description: error.value[0],
@@ -166,3 +157,14 @@ async function updateData(_event: FormSubmitEvent<Schema>) {
 }
 
 </script>
+
+<style>
+.squircle {
+  max-width: 180px;
+  max-height: 180px;
+  mask-image: url("data:image/svg+xml,%3csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M100 0C20 0 0 20 0 100s20 100 100 100 100-20 100-100S180 0 100 0Z'/%3e%3c/svg%3e");
+  mask-size: 180px;
+  mask-position: center;
+  mask-repeat: no-repeat;
+}
+</style>

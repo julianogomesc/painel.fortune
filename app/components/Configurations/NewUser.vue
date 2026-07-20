@@ -19,7 +19,7 @@
                                     placeholder="Selecione uma imagem"
                                     class="w-full mb-3"
                                     />
-                                    <UTooltip text="Cancelar">
+                                    <UTooltip text="Cancelar" v-if="props.data">
                                         <UButton icon="i-lucide-arrow-left" variant="outline" color="neutral"  class="mx-auto px-2 pb-0.5 block cursor-pointer" @click="changeFn(false)"/>
                                     </UTooltip>
                                 </div>
@@ -33,7 +33,7 @@
                         <UFormField label="E-mail:" name="email" required>
                             <UInput class="w-full" v-model="state.email" />
                         </UFormField>
-                        <UFormField label="Senha:" name="password" required>
+                        <UFormField label="Senha:" name="password" required v-if="!props.data">
                             <UInput class="w-full" v-model="state.password" />
                         </UFormField>
                         <UFormField label="Perfil:" name="perfil" required>
@@ -54,43 +54,41 @@
 </template>
 
 <script setup lang="ts">
+import { z } from 'zod'
+
 const props = defineProps({
     data: {
         type: Object,
         required: false
     }
 })
-
-function changeFn(value: boolean){
-    changeImage.value = value
-}
-
-const changeImage = ref(false)
-
 const emit = defineEmits<{
     close: [value: boolean]
 }>()
-
-function onSubmit(){
-    // emit('close', true)
-}
-
-function cancel(){
-    emit('close', false)
-}
 
 const perfis = ref([
     {value: 0, label: 'Operador'},
     {value: 1, label: 'Administrador'}
 ])
-
 const situacoes = ref([
     {value: 0, label: 'Inativo'},
     {value: 1, label: 'Ativo'}
 ])
 
-import { z } from 'zod'
+const changeImage = ref(false)
+function changeFn(value: boolean){
+    changeImage.value = value
+}
+
+function onSubmit(){
+    // emit('close', true)
+}
+function cancel(){
+    emit('close', false)
+}
+
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+
 const fileSchema = (label: string) =>
   z.instanceof(File, { message: `${label} é obrigatória` })
     .refine(f => ALLOWED_TYPES.includes(f.type), `${label}: formato inválido (use webp, jpg, jpeg ou png)`)

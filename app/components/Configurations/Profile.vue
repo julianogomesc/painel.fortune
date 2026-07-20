@@ -4,11 +4,11 @@
         <div class="px-4 my-5">
             <div class="grid grid-cols-12 gap-4">
                 <div class="col-span-12 lg:col-span-3 mb-3 text-center">
-                    <UAvatar class="rounded-none squircle" src="/images/nopicture.jpg" alt="Benjamin Canac" loading="lazy" size="4xl" />
+                    <UAvatar class="rounded-none squircle" :src="imagem ? imagem : '/images/nopicture.jpg'" alt="Benjamin Canac" loading="lazy" size="4xl" />
                     <div class="-mt-4 mb-3 relative z-50">
-                        <UTooltip text="Excluir Imagem">
+                        <!-- <UTooltip text="Excluir Imagem">
                             <UButton icon="i-lucide-trash" class="mr-2 cursor-pointer" variant="solid" color="error" />
-                        </UTooltip>
+                        </UTooltip> -->
                         <UTooltip text="Alterar Imagem">
                             <UButton icon="i-lucide-image-up" class="cursor-pointer" variant="solid" color="blueFortuneDark" />
                         </UTooltip>
@@ -83,10 +83,26 @@ const perfis = ref([
 ])
 
 onMounted(async () => {
-    data.nome = user.user?.nome
-    data.email = user.user?.email
-    data.perfil = Number(user.user?.perfil) as 0 | 1
-    data.situacao = Number(user.user?.situacao) as 0 | 1
+    
+    const {pending, error: errorGetData, result: resultGetData, fetchResult: fetchGetResult} = useApiRequests(
+        `/_painel/users/view/${user.user?.id}`,
+        'GET'
+    )
+    await fetchGetResult()
+    
+    interface UserResponse {
+        nome: string,
+        email: string,
+        perfil: number,
+        situacao: number,
+        imagem: string,
+    }
+    const userData = resultGetData.value as UserResponse
+    data.nome = userData.nome
+    data.email = userData.email
+    data.perfil = Number(userData.perfil) as 0 | 1
+    data.situacao = Number(userData.situacao) as 0 | 1
+    imagem.value = userData.imagem
 })
 
 const toast = useToast()

@@ -82,8 +82,8 @@ export const useApiRequestsPaginated = (endpoint: Ref<string> | string, rowsQtde
             const separator = endpointStr.includes('?') ? '&' : '?'
             const urlWithParams = `${endpointStr}${separator}page=${page.value}&rows=${rows.value}`
 
-            const { data, error: fetchError } = await useFetch(urlWithParams, {
-                key: `${endpointStr.split('?')[0]?.slice(0, 4) || ''}-get-paginated-${now}`,
+            const data = await $fetch(urlWithParams, {
+                // key: `${endpointStr.split('?')[0]?.slice(0, 4) || ''}-get-paginated-${now}`,
                 baseURL: config.public.apiBase,
                 method: 'GET',
                 headers: auth && store.user.token ? {
@@ -91,8 +91,8 @@ export const useApiRequestsPaginated = (endpoint: Ref<string> | string, rowsQtde
                 } : {},
             })
 
-            if (data.value) {
-                const res = data.value as any
+            if (data) {
+                const res = data as any
                 page.value = res.page ?? page.value
                 rows.value = res.rows ?? rows.value
                 total.value = res.total ?? 0
@@ -102,13 +102,12 @@ export const useApiRequestsPaginated = (endpoint: Ref<string> | string, rowsQtde
                 total.value = 0
             }
 
-            if (fetchError.value) {
-                error.value = toRaw(fetchError.value.data?.errors || fetchError.value.data)
-            }
+            // if (fetchError.value) {
+            //     error.value = toRaw(fetchError.value.data?.errors || fetchError.value.data)
+            // }
         }
-        catch (e) {
-            console.log(e)
-            error.value = e || { title: 'Erro Inesperado no RQ Front' }
+        catch (e: any) {
+            error.value = toRaw(e?.data?.errors || e?.data) || { title: 'Erro Inesperado no RQ Front' }
         }
         finally {
             pending.value = false

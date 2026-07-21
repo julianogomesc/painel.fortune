@@ -4,13 +4,13 @@
         <div class="px-4 my-5">
             <div class="grid grid-cols-12 gap-4">
                 <div class="col-span-12 lg:col-span-3 mb-3 text-center">
-                    <UAvatar class="rounded-none squircle" :src="imagem ? imagem : '/images/nopicture.jpg'" alt="Benjamin Canac" loading="lazy" size="4xl" />
+                    <UAvatar class="rounded-none squircle h-48 w-full" :src="imagem ? imagem : '/images/nopicture.jpg'" alt="Benjamin Canac" loading="lazy" />
                     <div class="-mt-4 mb-3 relative z-50">
                         <!-- <UTooltip text="Excluir Imagem">
                             <UButton icon="i-lucide-trash" class="mr-2 cursor-pointer" variant="solid" color="error" />
                         </UTooltip> -->
                         <UTooltip text="Alterar Imagem">
-                            <UButton icon="i-lucide-image-up" class="cursor-pointer" variant="solid" color="blueFortuneDark" />
+                            <UButton icon="i-lucide-image-up" class="cursor-pointer" variant="solid" color="blueFortuneDark" @click="changeImage(null)" />
                         </UTooltip>
                     </div>
                 </div>
@@ -104,6 +104,14 @@ onMounted(async () => {
     data.situacao = Number(userData.situacao) as 0 | 1
     imagem.value = userData.imagem
 })
+
+import NewUserModal from '~/components/Configurations/UpdatePhoto.vue'
+const overlay = useOverlay()
+const NewUserOverlay = overlay.create(NewUserModal)
+
+async function changeImage(item: Object | null) {
+    await NewUserOverlay.open()    
+}
 
 const toast = useToast()
 const login = useLoginStore()

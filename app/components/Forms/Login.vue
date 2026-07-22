@@ -70,14 +70,14 @@ const stateForgetPass = reactive<Partial<SchemaForgetPass>>({
 })
 const toast = useToast()
 
-const formData = computed(() => {
-    const fd = new FormData()
-    fd.append('email', state.email || '')
-    fd.append('password', state.password || '')
-    return fd
-})
+// const formData = computed(() => {
+//     const fd = new FormData()
+//     fd.append('email', state.email || '')
+//     fd.append('password', state.password || '')
+//     return fd
+// })
 
-const { pending: pendingLogin, error: errorLogin, result: resultLogin, fetchResult: fetchLogin } = useApiRequests("/_painel/users/login", "POST", formData, 'none', false)
+const { pending: pendingLogin, error: errorLogin, result: resultLogin, fetchResult: fetchLogin } = useApiRequests("/_painel/users/login", "POST", state, 'none', false)
 
 async function onSubmit(_event: FormSubmitEvent<Schema>) {
     await fetchLogin()
@@ -104,7 +104,28 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
 }
 
 async function forgetPassSubmit(_event: FormSubmitEvent<SchemaForgetPass>) {
-    toast.add({ title: 'Success', description: 'The form has been submitted.', color: 'success' })
+
+    const { error, result, fetchResult: fetchForget } = useApiRequests("/_painel/users/recover", "POST", stateForgetPass, 'formdata', false)
+    await fetchForget()
+
+     if(Array.isArray(error.value)) {
+        toast.add({
+            title: "Erro na recuperação da sua senha",
+            description: error.value[0],
+            icon: 'i-lucide-shield-alert',
+            color: "error",
+            duration: 1800
+        })
+    }
+    else if (result.value){
+        toast.add({
+            title: "Sucesso",
+            description: "Se o seu e-mail estiver cadastrado em nossa plataforma você receberá uma nova senha em breve!",
+            icon: "i-lucide-mail-check",
+            color: "success",
+            duration: 1800
+        })
+    }
 }
 
 function showEnabledPassword(){

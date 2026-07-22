@@ -51,6 +51,16 @@ onMounted(() => {
   fetchResult()
 })
 
+const usersStore = useUsersStore()
+
+watch(() => usersStore.shouldRefresh, (val) => {
+    if (val) {
+        fetchResult()
+        usersStore.resetRefresh()
+    }
+})
+
+
 const columns: TableColumn<Usuarios>[] = [
   {
     accessorKey: 'nome',
@@ -123,7 +133,7 @@ const columns: TableColumn<Usuarios>[] = [
             icon: 'i-lucide-trash-2',
             color: 'error' as const,
             onSelect: () => {
-              deleteBanner(row.original.id, row.original.nome)
+              deleteUser(row.original.id, row.original.nome)
             }
           }
         ]
@@ -150,14 +160,17 @@ const toast = useToast()
 async function addUser(item: Object | null) {
   if(item){
     await NewUserOverlay.open({
-      data: item
+      data: item,
+      title: 'Editar Usuário'
     })
   } else {
-    await NewUserOverlay.open()    
+    await NewUserOverlay.open({
+      title: 'Novo Usuário'      
+    })    
   }
 }
 
-async function deleteBanner(id: string | number, name: string) {
+async function deleteUser(id: string | number, name: string) {
   const ok = await confirmModal.open({
     title: `Excluir: ${name}`,
     description: 'Deseja realmente excluir este usuário?'

@@ -9,6 +9,12 @@ export const useApiRequests = (endpoint: Ref<string> | string, method: string | 
 
     type methodsPermited = 'GET' | 'POST' | 'DELETE' | 'PUT'
 
+    const userSaveImage = async () => {
+        const { fetchResult, result, pending, error } = useApiRequests(endpoint, method, body, typeSend )
+        await fetchResult()
+        return    
+    }
+
     const fetchResult = async () => {
         pending.value = true
         error.value = {}
@@ -55,7 +61,7 @@ export const useApiRequests = (endpoint: Ref<string> | string, method: string | 
     }
 
     return {
-        fetchResult, pending, error, result
+        fetchResult, userSaveImage, pending, error, result
     }
 
 }

@@ -28,10 +28,8 @@ async function saveImage(id: string | number) {
   })
 
   if (ok && state.imagem) {
-    const formData = new FormData()
-    formData.append('imagems', state.imagem)
-    const { fetchResult, result, error } = useApiRequests(`/_painel/users/avatar/${id}`, 'POST', state, 'formdata' )
-    await fetchResult()
+    const { userSaveImage, result, error } = useApiRequests(`/_painel/users/avatar/${id}`, 'POST', state, 'formdata' )
+    await userSaveImage()
 
     const response = result.value as {success: boolean}
 

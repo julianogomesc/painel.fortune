@@ -33,7 +33,9 @@ const items = [
         label: 'Ger. Usuários',
         icon: 'i-lucide-users',
         slot: 'users' as const,
-    } : {}
-] satisfies TabsItem[]
+    } : null
+].filter((item): item is NonNullable<typeof item> => item !== null) satisfies TabsItem[]
+
+
 
 </script>

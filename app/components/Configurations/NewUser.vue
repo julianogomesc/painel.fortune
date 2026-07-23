@@ -30,8 +30,9 @@
                         <UFormField label="E-mail:" name="email" required>
                             <UInput class="w-full" v-model="state.email" />
                         </UFormField>
-                        <UFormField label="Senha:" name="password" required v-if="!props.data">
-                            <UInput class="w-full" v-model="state.password" />
+                        <UFormField label="Senha:" name="password" required v-if="!props.data" class="relative">
+                            <UInput :type="!viewPass ? 'text' : 'password'" class="w-full" v-model="state.password" />
+                            <UButton class="absolute cursor-pointer right-0.5 top-0" :icon="viewPass ? 'i-lucide-eye' : 'i-lucide-eye-off'" @click="showPass" :ui="{ base: 'bg-neutral text-black active:bg-transparent disabled:bg-transparent hover:bg-neutral active:bg-neutral'}" />
                         </UFormField>
                         <UFormField label="Perfil:" name="perfil" required>
                             <USelect class="w-full" :items="perfis" v-model="state.perfil" />
@@ -53,6 +54,12 @@
 <script setup lang="ts">
 import { z } from 'zod'
 import { pick } from 'lodash-es';
+
+const viewPass = ref(false)
+
+function showPass(){
+    viewPass.value = !viewPass.value
+}
 
 const props = defineProps({
     data: {

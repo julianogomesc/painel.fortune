@@ -1,24 +1,20 @@
 <template>
-    Pneus
+    <ListPneus />
 </template>
 
 <script setup lang="ts">
+import type { layoutPageType } from '~/types/layoutPage';
+
 definePageMeta({
   layout: 'interna',
 })
 
-const titlePage = useState<{
-  title: string
-  categorie?: string | null
-  description?: string | null
-  urlButton?: string | null
-  textButton?: string | null
-}>('titlePage', () => {
+const titlePage = useState<layoutPageType>('titlePage', () => {
   return {
-    title: 'Pneus',
+    title: 'Categorias',
     categorie: null,
     description: null,
   }
 })
-titlePage.value = {title: 'Pneus', categorie: 'Produtos', description: 'Gerencie seus modelos de Pneus'}
+titlePage.value = {title: 'Pneus', categorie: 'Produtos', description: 'Gerencie seus modelos de pneus', textButton: 'Novo Pneu', urlButton: '/produtos/pneus/nova/0'}
 </script>

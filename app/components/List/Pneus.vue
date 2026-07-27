@@ -11,8 +11,8 @@ const UAvatar = resolveComponent('UAvatar')
 type Item = {
   id: string | number
   titulo: string
-  categoria: string
-  imagem?: string
+  categoria_nome: string
+  imagem_capa?: string
   uso_comercial: '0' | '1'
   uso_frotas: '0' | '1'
   uso_pessoal: '0' | '1'
@@ -70,13 +70,13 @@ const columns: TableColumn<Item>[] = [
     cell: ({ row }) => {
       return h('div', { class: 'flex items-center gap-3' }, [
         h(UAvatar, {
-          src: row.original.imagem,
+          src: row.original.imagem_capa,
           size: 'lg',
           alt: row.original.titulo
         }),
         h('div', undefined, [
           h('p', {class: 'font-medium text-highlighted'}, row.original.titulo),
-          h('p', {class: ''}, row.original.categoria),
+          h('p', {class: ''}, row.original.categoria_nome),
         ])
       ])
     }
@@ -121,18 +121,18 @@ const columns: TableColumn<Item>[] = [
             label: 'Editar',
             icon: 'i-lucide-pencil',
             onSelect: () => {
-              addUser(row.original)
-              // navigateTo(`/produtos/categorias/editar/${row.original.id}`)
+              // addUser(row.original)
+              navigateTo(`/produtos/pneus/editar/${row.original.id}`)
             }
           },
-          {
-            label: 'Excluir',
-            icon: 'i-lucide-trash-2',
-            color: 'error' as const,
-            onSelect: () => {
-              deleteUser(row.original.id, row.original.nome)
-            }
-          }
+          // {
+          //   label: 'Excluir',
+          //   icon: 'i-lucide-trash-2',
+          //   color: 'error' as const,
+          //   onSelect: () => {
+          //     deleteUser(row.original.id, row.original.titulo)
+          //   }
+          // }
         ]
       },
       () => h(UButton, {
@@ -251,13 +251,13 @@ async function searchCategories(term = termSearch.value.trim()) {
   }
 
   const { fetchResult: fetchSearch, result: searchResult } = useApiRequests(
-    `/_painel/users/show?page=1&rows=10&search=${encodeURIComponent(term)}`,
+    `/_painel/familias/show?page=1&rows=10&search=${encodeURIComponent(term)}`,
     'GET'
   )
 
   await fetchSearch()
 
-  const payload = searchResult.value as { data?: Usuarios[] } | Usuarios[]
+  const payload = searchResult.value as { data?: Item[] } | Item[]
   searchData.value = Array.isArray(payload) ? payload : payload?.data ?? []
 }
 
@@ -272,10 +272,10 @@ const sorting = ref([
 <template>
   <div class="mt-5 mb-3">
     <Loading v-if="pending" />
-    <div class="flex justify-between">
-      <InputSearch @search="handleSearch" />
+    <InputSearch @search="handleSearch" />
+    <!-- <div class="flex justify-between">
       <UButton icon="i-lucide-user-plus" label="Adicionar" class="cursor-pointer" @click="addUser(null)" />
-    </div>
+    </div> -->
     <UTable v-model:sorting="sorting" :data="data" :columns="columns" :loading="pending" class="flex-1">
       <template #empty>
         <div class="text-center text-gray-400 py-0">Nenhum registro encontrado!</div>

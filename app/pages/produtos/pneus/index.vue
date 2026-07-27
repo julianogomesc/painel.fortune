@@ -16,5 +16,5 @@ const titlePage = useState<layoutPageType>('titlePage', () => {
     description: null,
   }
 })
-titlePage.value = {title: 'Pneus', categorie: 'Produtos', description: 'Gerencie seus modelos de pneus', textButton: 'Novo Pneu', urlButton: '/produtos/pneus/nova/0'}
+titlePage.value = {title: 'Pneus', categorie: 'Produtos', description: 'Gerencie seus modelos de pneus.', textButton: 'Novo Pneu', urlButton: ''}
 </script>

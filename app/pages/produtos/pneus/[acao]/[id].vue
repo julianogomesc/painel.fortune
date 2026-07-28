@@ -1,5 +1,5 @@
 <template>
-    <FormsNewCategory @success="onSuccess"/>
+    <FormsTireEdit @success="onSuccess"/>
 </template>
 
 <script setup lang="ts">
@@ -19,7 +19,7 @@ const titlePage = useState<layoutPageType>('titlePage', () => {
     colorButton: null,
   }
 })
-titlePage.value = {title: 'Pneus', categorie: 'Produtos', description: 'Gerenciar dados dos pneus', textButton: 'Voltar', urlButton: '/produtos/pneus', colorButton: 'neutral'}
+titlePage.value = {title: 'Pneus', categorie: 'Produtos', description: 'Gerenciar dados do pneu', textButton: 'Voltar', urlButton: '/produtos/pneus', colorButton: 'neutral'}
 
 function onSuccess(){
   toast.add({

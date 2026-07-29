@@ -28,6 +28,6 @@ function onSuccess(){
     color: 'success',
     duration: 1500,
   })
-  navigateTo('/produtos/pneus')
+  // navigateTo('/produtos/pneus')
 }
 </script>

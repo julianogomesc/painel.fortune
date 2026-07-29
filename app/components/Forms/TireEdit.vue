@@ -21,11 +21,11 @@ interface item {
   imagens?: string[]
 }
 
-// const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg']
-
-// const fileSchema = (label: string) =>
-//   z.instanceof(File, { message: `${label} é obrigatória` })
-//     .refine(f => ALLOWED_TYPES.includes(f.type), `${label}: formato inválido (use webp, jpg, jpeg ou png)`)
+interface imageGalery{
+  capa: number
+  id: number
+  imagem: string
+}
 
 const schema = z.object({
   categoria_id: z.number().min(1, 'Categoria é obrigatório'),
@@ -63,49 +63,32 @@ const hasPdfChanged = computed(() => pdf.value instanceof File)
 const hasGaleryChanged = computed(() => image_galery.value.some(item => item instanceof File))
 
 
-// const hasImageFile = computed(() => state.imagem instanceof File || String(state.imagem) === '[object File]')
-// const categoryPayload = computed(() => ({
-//   nome: state.nome,
-//   descricao: state.descricao,
-//   situacao: state.situacao,
-// }))
-// const imagePayload = computed(() => ({
-//   imagem: state.imagem,
-// }))
-// const hasFieldChanges = computed(() => {
-//   if (!isEditing.value || !categoryResult.value || typeof categoryResult.value !== 'object') return false
-
-//   const currentCategory = categoryResult.value as {
-//     nome?: string,
-//     descricao?: string,
-//     situacao?: number,
-//   }
-
-//   return state.nome !== (currentCategory.nome ?? '')
-//     || state.descricao !== (currentCategory.descricao ?? '')
-//     || state.situacao !== (currentCategory.situacao ?? undefined)
-// })
+function isFile(value: unknown): value is File {
+  return typeof File !== 'undefined' && value instanceof File
+}
 
 const emit = defineEmits<{ success: [] }>()
 
-// const { fetchResult, pending, error } = useApiRequests(
-//   `/_painel/familias/view/${route.params.id}`,
-//   'GET',
-//   state,
-//   'formdata'
-// )
 const { fetchResult, result, pending, error } = useApiRequests(
   `/_painel/familias/view/${route.params.id}`,
   'GET'
 )
 
+const { fetchResult: submitForm, result: resultForm, pending: pendingForm, error: errorForm } = useApiRequests(
+  `/_painel/familias/${route.params.id}`,
+  'PUT',
+  state,
+  'none'
+)
+
 const previewImagem = ref<string>()
 const previewImagemMobile = ref<string>()
 
-function updatePreview(file: File | undefined, previewRef: Ref<string | undefined>) {
-  if (previewRef.value) URL.revokeObjectURL(previewRef.value)
-  previewRef.value = file ? URL.createObjectURL(file) : undefined
+function updatePreview(file: File | string | undefined, previewRef: Ref<string | undefined>) {
+  if (previewRef.value?.startsWith('blob:')) URL.revokeObjectURL(previewRef.value)
+  previewRef.value = file instanceof File ? URL.createObjectURL(file) : file ?? undefined
 }
+
 
 watch(() => image_principal.value, file => updatePreview(file, previewImagem))
 
@@ -139,6 +122,14 @@ function populateForm(){
 
 }
 
+function addImageGalerie(){
+  image_galery.value.push('')
+}
+
+function delImageGalerie(id:number){
+  image_galery.value.splice(id, 1)
+}
+
 const { fetchResult: fetchImagePrincipal, error: errorImagePrincipal } = useApiRequests(
   `/_painel/familias/imagens/${route.params.id}`,
   'POST',
@@ -149,20 +140,24 @@ const { fetchResult: fetchImagePrincipal, error: errorImagePrincipal } = useApiR
 const { fetchResult: fetchPdf, error: errorPdf } = useApiRequests(
   `/_painel/familias/pdf/${route.params.id}`,
   'POST',
-  { pdf },
-  'formdata'
+  {pdf},
+  "formdata"
 )
 
-const { fetchResult: fetchGalery, error: errorGalery } = useApiRequests(
+const { fetchResult: fetchGalery, pending: pendingGallery, error: errorGalery } = useApiRequestsGallery(
   `/_painel/familias/imagens/${route.params.id}`,
   'POST',
-  { imagens: image_galery },
-  'formdata'
+  "imagens",
+  image_galery
 )
+
+function changeImage(index: number){
+  image_galery.value[index] = ''
+}
 
 
 async function onSubmit() {
-   await fetchResult() // rota principal de alteração do produto (sempre chamada)
+   await submitForm() // rota principal de alteração do produto (sempre chamada)
   if (Object.keys(error.value).length) return
 
   if (hasImagePrincipalChanged.value) {
@@ -171,6 +166,7 @@ async function onSubmit() {
   }
 
   if (hasPdfChanged.value) {
+    // alert('deve subir o pdf')
     await fetchPdf() // rota separada para pdf
     if (Object.keys(errorPdf.value).length) return
   }
@@ -183,6 +179,21 @@ async function onSubmit() {
     emit('success')
   }
 }
+
+async function delItemGalleryImage(id: number) {
+  const { fetchResult: delImg, result: rsImgDel, pending: pendingDelImg, error: errorDelImg } = useApiRequests(
+    `/_painel/familias/${route.params.id}`,
+    'DELETE',
+    state,
+    'none'
+  )
+}
+
+function namePdf(item: string){
+  const res = item.split("/").pop()
+  return res
+}
+
 </script>
 
 <template>
@@ -199,7 +210,27 @@ async function onSubmit() {
         </div>
         <div class="col-span-12 md:col-span-3">
           <UFormField label="Código:" name="codigo" required>
-            <UInput v-model="state.codigo" maxlength="255" class="w-full" disabled />
+            <UInput v-model="state.codigo" maxlength="255" class="w-full" disabled :ui="{base: 'bg-gray-200'}" />
+          </UFormField>
+        </div>
+        <div class="col-span-12">
+          <!-- {{ pdf }}
+          {{ hasPdfChanged }} -->
+          <UFormField label="PDF Técnico:" name="pdf">
+            <!-- {{ pdf }} -->
+            <UButton v-if="typeof pdf === 'string'" :href="pdf" target="_blank" icon="i-lucide-file-text" class="mr-2">
+              {{ namePdf(pdf) }}
+            </UButton>
+            <UButton v-if="typeof pdf === 'string'" icon="i-lucide-x" color="error" />
+            <UFileUpload
+                layout="list"
+                position="inside"
+                :model-value="isFile(pdf) ? pdf : undefined"
+                @update:model-value="(f) => pdf = f ?? ''"
+                accept=".pdf,.pdfx"
+                placeholder="Selecione um arquivo PDF"
+                class="w-full"
+            />
           </UFormField>
         </div>
         <div class="col-span-12 md:col-span-6">
@@ -232,19 +263,40 @@ async function onSubmit() {
             <USwitch v-model="state.situacao" :true-value="1" :false-value="0" unchecked-icon="i-lucide-x" checked-icon="i-lucide-check" :ui="{base: 'cursor-pointer'}" />
           </UFormField>
         </div>
-        <div class="col-span-12 ">
+        <div class="col-span-12 my-6">
+          <div class="grid grid-cols-12 gap-4">
+            <!-- {{ image_galery }} -->
+            <div class="col-span-12 md:col-span-3 relative mb-3" v-for="(image, index) in image_galery" :key="index" >
+              <UFormField :label="index == 0 ? 'Imagem Principal': `${index + 1}º Imagem`" name="imagem">
+                  <div class="flex items-center gap-3">
+                      <!-- <img v-if="previewImagem" :src="previewImagem" class="h-12 w-12 object-cover rounded"> -->
+                      <img v-if="image_galery[index].imagem" :src="image_galery[index].imagem" class="max-h-22 rounded-xl w-full object-cover">
+                      <UFileUpload
+                          v-if="!image_galery[index].imagem"
+                          :model-value="isFile(image_galery[index]) ? image_galery[index] : undefined"
+                          @update:model-value="(f) => image_galery[index] = f ?? ''"
+                          accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                          placeholder="Selecione uma imagem"
+                          class="w-full"
+                      />
+                  </div>
+              </UFormField>
+              <template v-if="image_galery[index].imagem">
+                <UTooltip text="Alterar Imagem">
+                  <UButton icon="i-lucide-refresh-ccw" color="neutral" size="xs" class="absolute top-4 -right-2 cursor-pointer rounded-full" @click="changeImage(index)" />
+                </UTooltip>
+                <UTooltip text="Deletar Imagem">
+                  <UButton icon="i-lucide-trash" color="error" size="xs" class="absolute top-11 -right-2 cursor-pointer rounded-full" @click="delItemGalleryImage(image_galery[index].id)" />
+                </UTooltip>
+              </template>
+
+              <UButton v-if="!image_galery[index].imagem" icon="i-lucide-trash" color="error" size="xs" class="absolute top-11 -right-2 cursor-pointer rounded-full" @click="delImageGalerie(index)" />
+            </div>
+            <div class="col-span-12 md:col-span-3 bg-blueFortune rounded-lg justify-center align-items-center flex">
+              <UButton label="ADICIONAR IMAGEM" size="sm" color="white" :ui="{base: 'cursor-pointer min-h-24'}" @click="addImageGalerie" />
+            </div>
+          </div>
         <!-- <pre>{{ state }}</pre> -->
-            <UFormField label="Imagem:" name="imagem">
-                <div class="flex items-center gap-3">
-                    <img v-if="previewImagem" :src="previewImagem" class="h-12 w-12 object-cover rounded">
-                    <UFileUpload
-                        v-model="image_principal"
-                        accept=".jpg,.jpeg,.png,image/jpeg,image/png"
-                        placeholder="Selecione uma imagem"
-                        class="w-full"
-                    />
-                </div>
-            </UFormField>
         </div>
         <div class="col-span-12 text-right">
             <UButton type="submit" :loading="pending" :ui="{base: 'cursor-pointer py-2.5 px-5'}">

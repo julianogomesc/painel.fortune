@@ -24,11 +24,18 @@ export const useApiRequests = (endpoint: Ref<string> | string, method: string | 
             const payload = unref(body as Record<string, unknown> | Ref<Record<string, unknown>> | undefined)
 
             if (payload && typeof payload === 'object' && !(payload instanceof FormData)) {
+                // for (const [key, value] of Object.entries(payload)) {
+                //     if (value != null && value != undefined) {
+                //         fd.append(key, value instanceof Blob ? value : String(value))
+                //     }
+                // }
                 for (const [key, value] of Object.entries(payload)) {
-                    if (value != null && value != undefined) {
-                        fd.append(key, value instanceof Blob ? value : String(value))
+                    const val = unref(value as File | string | undefined)
+                    if (val != null) {
+                        fd.append(key, val instanceof Blob ? val : String(val))
                     }
                 }
+
             }
         }
 
@@ -123,4 +130,49 @@ export const useApiRequestsPaginated = (endpoint: Ref<string> | string, rowsQtde
     return {
         fetchResult, pending, error, result, page, rows, total
     }
+}
+
+export const useApiRequestsGallery = (endpoint: Ref<string> | string, method: string | Ref<string>, fieldName: string | Ref<string>, items: Ref<Array<File | string>>, auth: boolean = true) => {
+    const config = useRuntimeConfig()
+    const store = useLoginStore()
+
+    const pending = ref(false)
+    const error = ref({})
+    const result = ref<[] | {}>([])
+
+    const fetchResult = async () => {
+        pending.value = true
+        error.value = {}
+
+        const fd = new FormData()
+        items.value.forEach((item, index) => {
+            if (item != null) fd.append(`${fieldName}[${index}]`, item instanceof Blob ? item : String(item))
+        })
+
+        const now = new Date().getMilliseconds()
+
+        try{
+            const methodVal = unref(method).toUpperCase() as 'GET' | 'POST' | 'DELETE' | 'PUT'
+            const { data, error: fetchError } = await useFetch(unref(endpoint), {
+                key: `gal-${methodVal.toLowerCase()}-${now}`,
+                baseURL: config.public.apiBase,
+                method: methodVal,
+                headers: auth && store.user.token ? { Authorization: `Bearer ${store.user.token}` } : {},
+                body: fd,
+                watch: false
+            })
+            result.value = data.value || {}
+            if (fetchError.value) {
+                error.value = toRaw(fetchError.value.data.errors)
+            }
+        }
+        catch(e){
+            error.value = e || {title: 'Erro Inesperado no RQ Front'}
+        }
+        finally {
+            pending.value = false
+        }
+
+    }
+    return {fetchResult, pending, error, result}
 }

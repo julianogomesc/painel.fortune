@@ -1,5 +1,5 @@
 <template>
-    Medidas
+    <ListMedidas />
 </template>
 
 <script setup lang="ts">

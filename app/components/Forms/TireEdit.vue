@@ -2,9 +2,6 @@
 import { z } from 'zod'
 const route = useRoute()
 
-// const isEditing = computed(() => route.params.acao === 'editar' && route.params.id)
-// const bannerId = computed(() => String(route.params.id) as string | undefined)
-
 interface item {
   categoria_id: number
   codigo: string
@@ -20,12 +17,6 @@ interface item {
   categoria_nome: string
   imagem_capa?: string
   imagens?: string[]
-}
-
-interface imageGalery{
-  capa: number
-  id: number
-  imagem: string
 }
 
 const schema = z.object({
@@ -192,11 +183,6 @@ async function onSubmit() {
     populateForm()
     emit('success')
   }
-}
-
-function namePdf(item: string){
-  const res = item.split("/").pop()
-  return res
 }
 
 import ConfirmModal from '~/components/ConfirmModal.vue'

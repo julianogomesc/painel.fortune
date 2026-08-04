@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { z } from 'zod'
 const route = useRoute()
+
 // const isEditing = computed(() => route.params.acao === 'editar' && route.params.id)
 // const bannerId = computed(() => String(route.params.id) as string | undefined)
 
@@ -56,7 +57,18 @@ const state = reactive<Partial<Schema>>({
 
 const image_principal = ref<File | string | undefined>(undefined)
 const pdf = ref<File | string | undefined>(undefined)
-const image_galery = ref<Array<File | string>>([])
+type GalleryImage = string | File | { imagem: string; id?: number }
+
+const image_galery = ref<GalleryImage[]>([])
+
+const isImageObject = (image: GalleryImage): image is { imagem: string; id?: number } =>
+  typeof image !== 'string' && !(image instanceof File) && 'imagem' in image
+
+const uploadImageGallery = computed(() =>
+  image_galery.value.filter(
+    (item): item is string | File => typeof item === 'string' || item instanceof File
+  )
+)
 
 const hasImagePrincipalChanged = computed(() => image_principal.value instanceof File)
 const hasPdfChanged = computed(() => pdf.value instanceof File)
@@ -148,7 +160,7 @@ const { fetchResult: fetchGalery, pending: pendingGallery, error: errorGalery } 
   `/_painel/familias/imagens/${route.params.id}`,
   'POST',
   "imagens",
-  image_galery
+  uploadImageGallery
 )
 
 function changeImage(index: number){
@@ -182,15 +194,6 @@ async function onSubmit() {
   }
 }
 
-async function delItemGalleryImage(id: number) {
-  const { fetchResult: delImg, result: rsImgDel, pending: pendingDelImg, error: errorDelImg } = useApiRequests(
-    `/_painel/familias/${route.params.id}`,
-    'DELETE',
-    state,
-    'none'
-  )
-}
-
 function namePdf(item: string){
   const res = item.split("/").pop()
   return res
@@ -214,6 +217,29 @@ async function deletePDF() {
       toast.add({
         title: 'Sucesso',
         description: 'Arquivo PDF excluído com sucesso!',
+        color: 'success',
+        duration: 1300,
+      })
+      await fetchResult()
+      populateForm()
+    }
+  } return
+}
+
+async function deleteImg(id: string | number) {
+  const ok = await confirmModal.open({
+    title: 'Excluir Imagem',
+    description: 'Deseja realmente excluir esta imagem?'
+  })
+
+  if (ok) {
+    // alert(route.params.id + ' - ' + id)
+    const { fetchResult: fetchDeleteImg, pending: pendingDeleteImg } = useApiRequests(`/_painel/familias/imagens/${route.params.id}/${id}`, 'DELETE')
+    await fetchDeleteImg()
+    if (!pendingDeleteImg.value) {
+      toast.add({
+        title: 'Sucesso',
+        description: 'Imagem excluída com sucesso!',
         color: 'success',
         duration: 1300,
       })
@@ -302,10 +328,10 @@ async function deletePDF() {
               <UFormField :label="index == 0 ? 'Imagem Principal': `${index + 1}º Imagem`" name="imagem">
                   <div class="flex items-center gap-3">
                       <!-- <img v-if="previewImagem" :src="previewImagem" class="h-12 w-12 object-cover rounded"> -->
-                      <img v-if="image_galery[index].imagem" :src="image_galery[index].imagem" class="max-h-22 rounded-xl w-full object-cover">
+                      <img v-if="isImageObject(image)" :src="image?.imagem" class="max-h-22 rounded-xl w-full object-cover">
                       <UFileUpload
-                          v-if="!image_galery[index].imagem"
-                          :model-value="isFile(image_galery[index]) ? image_galery[index] : undefined"
+                          v-if="!isImageObject(image)"
+                          :model-value="isFile(image) ? image : undefined"
                           @update:model-value="(f) => image_galery[index] = f ?? ''"
                           accept=".jpg,.jpeg,.png,image/jpeg,image/png"
                           placeholder="Selecione uma imagem"
@@ -313,16 +339,16 @@ async function deletePDF() {
                       />
                   </div>
               </UFormField>
-              <template v-if="image_galery[index].imagem">
+              <template v-if="isImageObject(image) && image.id !== null && image.id !== undefined">
                 <UTooltip text="Alterar Imagem">
                   <UButton icon="i-lucide-refresh-ccw" color="neutral" size="xs" class="absolute top-4 -right-2 cursor-pointer rounded-full" @click="changeImage(index)" />
                 </UTooltip>
                 <UTooltip text="Deletar Imagem">
-                  <UButton icon="i-lucide-trash" color="error" size="xs" class="absolute top-11 -right-2 cursor-pointer rounded-full" @click="delItemGalleryImage(image_galery[index].id)" />
+                  <UButton icon="i-lucide-trash" color="error" size="xs" class="absolute top-11 -right-2 cursor-pointer rounded-full" @click="deleteImg(image.id)" />
                 </UTooltip>
               </template>
 
-              <UButton v-if="!image_galery[index].imagem" icon="i-lucide-trash" color="error" size="xs" class="absolute top-11 -right-2 cursor-pointer rounded-full" @click="delImageGalerie(index)" />
+              <UButton v-if="!isImageObject(image)" icon="i-lucide-trash" color="error" size="xs" class="absolute top-11 -right-2 cursor-pointer rounded-full" @click="delImageGalerie(index)" />
             </div>
             <div class="col-span-12 md:col-span-3 bg-blueFortune rounded-lg justify-center align-items-center flex">
               <UButton label="ADICIONAR IMAGEM" size="sm" color="white" :ui="{base: 'cursor-pointer min-h-24'}" @click="addImageGalerie" />

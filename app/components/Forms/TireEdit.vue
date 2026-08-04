@@ -176,6 +176,8 @@ async function onSubmit() {
     if (Object.keys(errorGalery.value).length) return
   }
   if (!Object.keys(error.value).length) {
+    await fetchResult()
+    populateForm()
     emit('success')
   }
 }
@@ -192,6 +194,33 @@ async function delItemGalleryImage(id: number) {
 function namePdf(item: string){
   const res = item.split("/").pop()
   return res
+}
+
+import ConfirmModal from '~/components/ConfirmModal.vue'
+const overlay = useOverlay()
+const confirmModal = overlay.create(ConfirmModal)
+const toast = useToast()
+
+async function deletePDF() {
+  const ok = await confirmModal.open({
+    title: 'Excluir PDF',
+    description: 'Deseja realmente excluir este arquivo?'
+  })
+
+  if (ok) {
+    const { fetchResult: fetchDelete, pending: pendingDelete } = useApiRequests(`/_painel/familias/pdf/${route.params.id}`, 'DELETE')
+    await fetchDelete()
+    if (!pendingDelete.value) {
+      toast.add({
+        title: 'Sucesso',
+        description: 'Arquivo PDF excluído com sucesso!',
+        color: 'success',
+        duration: 1300,
+      })
+      await fetchResult()
+      populateForm()
+    }
+  } return
 }
 
 </script>
@@ -218,11 +247,14 @@ function namePdf(item: string){
           {{ hasPdfChanged }} -->
           <UFormField label="PDF Técnico:" name="pdf">
             <!-- {{ pdf }} -->
-            <UButton v-if="typeof pdf === 'string'" :href="pdf" target="_blank" icon="i-lucide-file-text" class="mr-2">
-              {{ namePdf(pdf) }}
+            <UButton v-if="typeof pdf === 'string'" :href="pdf" target="_blank" icon="i-lucide-file-text" color="black" class="mr-2 bg-gray-400 hover:bg-white hover:text-black" size="xs">
+              Visualizar PDF
             </UButton>
-            <UButton v-if="typeof pdf === 'string'" icon="i-lucide-x" color="error" />
+            <UTooltip text="Deletar / Alterar PDF">
+              <UButton v-if="typeof pdf === 'string'" icon="i-lucide-x" color="error" size="xs" :ui="{base: 'cursor-pointer'}" @click="deletePDF" />
+            </UTooltip>
             <UFileUpload
+              v-if="typeof pdf !== 'string'"
                 layout="list"
                 position="inside"
                 :model-value="isFile(pdf) ? pdf : undefined"

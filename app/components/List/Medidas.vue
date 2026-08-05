@@ -41,7 +41,12 @@ function handleSearch(value: string) {
   void searchCategories(value)
 }
 
-async function filterSizes(value: string | number){
+async function filterSizes(value: string | number | undefined) {
+  if(value === undefined) return 
+  if(value === 0 || value === '0') {
+    fetchResult()
+    return
+  }
   const { fetchResult: fetchFilterSizes, pending: pendingFilterSizes, result: filterSizesResult } = useApiRequestsPaginated(`/_painel/familias/${value}/produtos`, qtdeRows.value)
   await fetchFilterSizes()
   result.value = filterSizesResult.value as Item[]
@@ -185,25 +190,25 @@ const columns: TableColumn<Item>[] = [
 // import ConfirmModal from '~/components/ConfirmModal.vue'
 import NewUserModal from '~/components/Configurations/NewUser.vue'
 // import { U } from 'vue-router/dist/index-BQLwgiyK.js'
-const overlay = useOverlay()
+// const overlay = useOverlay()
 // const confirmModal = overlay.create(ConfirmModal)
-const NewUserOverlay = overlay.create(NewUserModal)
+// const NewUserOverlay = overlay.create(NewUserModal)
 // const toast = useToast()
 
 
 
-async function addUser(item: Object | null) {
-  if(item){
-    await NewUserOverlay.open({
-      data: item,
-      title: 'Editar Usuário'
-    })
-  } else {
-    await NewUserOverlay.open({
-      title: 'Novo Usuário'      
-    })    
-  }
-}
+// async function addUser(item: Object | null) {
+//   if(item){
+//     await NewUserOverlay.open({
+//       data: item,
+//       title: 'Editar Usuário'
+//     })
+//   } else {
+//     await NewUserOverlay.open({
+//       title: 'Novo Usuário'      
+//     })    
+//   }
+// }
 
 // async function deleteUser(id: string | number, name: string) {
 //   const ok = await confirmModal.open({
@@ -334,6 +339,13 @@ const sorting = ref([
         v-model:page="page"
         :total="total"
         :items-per-page="rows"
+        :ui="{
+          item: 'cursor-pointer',
+          first: 'cursor-pointer',
+          prev: 'cursor-pointer',
+          next: 'cursor-pointer',
+          last: 'cursor-pointer',
+        }"
       />
     </div>
   </div>

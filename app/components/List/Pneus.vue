@@ -287,6 +287,13 @@ const sorting = ref([
         v-model:page="page"
         :total="total"
         :items-per-page="rows"
+        :ui="{
+          item: 'cursor-pointer',
+          first: 'cursor-pointer',
+          prev: 'cursor-pointer',
+          next: 'cursor-pointer',
+          last: 'cursor-pointer',
+        }"
       />
     </div>
   </div>

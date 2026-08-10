@@ -27,7 +27,8 @@ type Item = {
 const qtdeRows = ref(10)
 const termSearch = ref('')
 
-const endpoint = computed(() => `_painel/produtos/show?page=1&rows=10`)
+// const endpoint = computed(() => `_painel/produtos/show?page=1&rows=10`)
+const endpoint = ref(`_painel/produtos/show?page=1&rows=10`)
 
 function handleSearch(value: string) {
   termSearch.value = value
@@ -42,15 +43,16 @@ function handleSearch(value: string) {
 }
 
 async function filterSizes(value: string | number | undefined) {
-  if(value === undefined) return 
-  if(value === 0 || value === '0') {
-    fetchResult()
-    return
-  }
-  const { fetchResult: fetchFilterSizes, pending: pendingFilterSizes, result: filterSizesResult } = useApiRequestsPaginated(`/_painel/familias/${value}/produtos`, qtdeRows.value)
-  await fetchFilterSizes()
-  result.value = filterSizesResult.value as Item[]
+  if (value === undefined) return
+
+  endpoint.value = (value === 0 || value === '0')
+    ? '_painel/produtos/show?page=1&rows=10'
+    : `_painel/familias/${value}/produtos`
+
+  page.value = 1
+  await fetchResult()
 }
+
 
 const { fetchResult, pending, result, page, rows, total } = useApiRequestsPaginated(endpoint, qtdeRows.value)
 
@@ -164,7 +166,8 @@ const columns: TableColumn<Item>[] = [
             icon: 'i-lucide-pencil',
             onSelect: () => {
               // addUser(row.original)
-              navigateTo(`/produtos/medidas/editar/${row.original.id}`)
+              viewItem(row.original)
+              // navigateTo(`/produtos/medidas/editar/${row.original.id}`)
             }
           },
           // {
@@ -188,14 +191,22 @@ const columns: TableColumn<Item>[] = [
 ]
 
 // import ConfirmModal from '~/components/ConfirmModal.vue'
-import NewUserModal from '~/components/Configurations/NewUser.vue'
+// import NewUserModal from '~/components/Configurations/NewUser.vue'
 // import { U } from 'vue-router/dist/index-BQLwgiyK.js'
 // const overlay = useOverlay()
 // const confirmModal = overlay.create(ConfirmModal)
 // const NewUserOverlay = overlay.create(NewUserModal)
 // const toast = useToast()
 
+const itemSelected = ref<Object | null>({})
+const openSlideOver = ref(false)
 
+function viewItem (item: Object | null){
+  if(item){
+    itemSelected.value = {...item, situacao: String(item.situacao) as unknown as Item['situacao']}
+    openSlideOver.value = true
+  }
+}
 
 // async function addUser(item: Object | null) {
 //   if(item){
@@ -304,6 +315,11 @@ async function searchCategories(term = termSearch.value.trim()) {
   searchData.value = Array.isArray(payload) ? payload : payload?.data ?? []
 }
 
+async function updateTable(){
+  await fetchResult()
+  openSlideOver.value = false
+}
+
 const sorting = ref([
   {
     id: 'nome',
@@ -348,6 +364,12 @@ const sorting = ref([
         }"
       />
     </div>
+
+    <USlideover v-model:open="openSlideOver">
+      <template #body>
+        <ViewSize v-if="itemSelected" :item="itemSelected" @refresh-data="updateTable" />
+      </template>
+    </USlideover>
   </div>
 </template>
 

@@ -14,14 +14,14 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-12 gap-12 mt-8">
+    <div class="grid grid-cols-12 gap-12 mt-2">
       <div class="col-span-12 md:col-span-6">
         <h3 class="my-5 font-bold text-2xl uppercase tracking-tight px-5">Medidas</h3>
-        <ListMedidas />
+        <ListMedidas perPage="5" />
       </div>
       <div class="col-span-12 md:col-span-6">
         <h3 class="my-5 font-bold text-2xl uppercase tracking-tight px-5">Pneus</h3>
-        <ListPneus />
+        <ListPneus perPage="5" />
       </div>
     </div>
 </template>

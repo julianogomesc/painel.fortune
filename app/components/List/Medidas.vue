@@ -3,6 +3,19 @@ import { h, resolveComponent } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
 import type { Column } from '@tanstack/vue-table'
 
+const props = defineProps({
+  inside: {
+    type: Boolean,
+    default: false
+  },
+  idFamilia: {
+    type: String || Number || undefined
+  },
+  perPage: {
+    type: String || Number || undefined
+  }
+})
+
 const UBadge = resolveComponent('UBadge')
 const UIcon = resolveComponent('UIcon')
 const UTooltip = resolveComponent('UTooltip')
@@ -21,13 +34,12 @@ type Item = {
   eps?: string
   rr?: string
   velocidade?: string
-  situacao: '0' | '1'
+  situacao?: '0' | '1'
 }
 
-const qtdeRows = ref(10)
+const qtdeRows = ref(Number(props.perPage) || 10)
 const termSearch = ref('')
 
-// const endpoint = computed(() => `_painel/produtos/show?page=1&rows=10`)
 const endpoint = ref(`_painel/produtos/show?page=1&rows=10`)
 
 function handleSearch(value: string) {
@@ -68,6 +80,9 @@ const data = computed<Item[]>(() => {
 watch(page, () => fetchResult())
 
 onMounted(() => {
+  if(props.idFamilia){
+    endpoint.value = `_painel/familias/${props.idFamilia}/produtos`
+  }
   fetchResult()
 })
 
@@ -170,14 +185,6 @@ const columns: TableColumn<Item>[] = [
               // navigateTo(`/produtos/medidas/editar/${row.original.id}`)
             }
           },
-          // {
-          //   label: 'Excluir',
-          //   icon: 'i-lucide-trash-2',
-          //   color: 'error' as const,
-          //   onSelect: () => {
-          //     deleteUser(row.original.id, row.original.titulo)
-          //   }
-          // }
         ]
       },
       () => h(UButton, {
@@ -190,57 +197,17 @@ const columns: TableColumn<Item>[] = [
   }
 ]
 
-// import ConfirmModal from '~/components/ConfirmModal.vue'
-// import NewUserModal from '~/components/Configurations/NewUser.vue'
-// import { U } from 'vue-router/dist/index-BQLwgiyK.js'
-// const overlay = useOverlay()
-// const confirmModal = overlay.create(ConfirmModal)
-// const NewUserOverlay = overlay.create(NewUserModal)
-// const toast = useToast()
-
-const itemSelected = ref<Object | null>({})
+// const itemSelected = ref<Object | null>(null)
 const openSlideOver = ref(false)
 
-function viewItem (item: Object | null){
+const itemSelected = ref<Item | null>(null)
+
+function viewItem (item: Item | null){
   if(item){
-    itemSelected.value = {...item, situacao: String(item.situacao) as unknown as Item['situacao']}
+    itemSelected.value = {...item, situacao: String(item.situacao) as Item['situacao']}
     openSlideOver.value = true
   }
 }
-
-// async function addUser(item: Object | null) {
-//   if(item){
-//     await NewUserOverlay.open({
-//       data: item,
-//       title: 'Editar Usuário'
-//     })
-//   } else {
-//     await NewUserOverlay.open({
-//       title: 'Novo Usuário'      
-//     })    
-//   }
-// }
-
-// async function deleteUser(id: string | number, name: string) {
-//   const ok = await confirmModal.open({
-//     title: `Excluir: ${name}`,
-//     description: 'Deseja realmente excluir este usuário?'
-//   })
-
-//   if (ok) {
-//     const { fetchResult: fetchDelete, pending: pendingDelete } = useApiRequests(`/_painel/users/${id}`, 'DELETE')
-//     await fetchDelete()
-//     if (!pendingDelete.value) {
-//       toast.add({
-//         title: 'Sucesso',
-//         description: 'Usuário deletado com sucesso!',
-//         color: 'success',
-//         duration: 1300,
-//       })
-//       await fetchResult()
-//     }
-//   } return
-// }
 
 function getHeader(column: Column<Item>, label: string) {
   const isSorted = column.getIsSorted()
@@ -322,7 +289,7 @@ async function updateTable(){
 
 const sorting = ref([
   {
-    id: 'nome',
+    id: 'medida',
     desc: false
   }
 ])
@@ -332,17 +299,13 @@ const sorting = ref([
   <div class="mt-5 mb-3">
     <Loading v-if="pending" />
     <div class="grid grid-cols-12 gap-3">
-      <div class="col-span-7 md:col-span-8 lg:col-span-9 xl:col-span-10">
+      <div :class="inside ? 'col-span-12' : 'col-span-7 md:col-span-8 lg:col-span-9 xl:col-span-10'">
         <InputSearch @search="handleSearch" />
       </div>
-      <div class="col-span-5 md:col-span-4 lg:col-span-3 xl:col-span-2">
+      <div v-if="!inside" class="col-span-5 md:col-span-4 lg:col-span-3 xl:col-span-2">
         <FilterSizes @update:size="filterSizes" />
       </div>
     </div>
-    
-    <!-- <div class="flex justify-between">
-      <UButton icon="i-lucide-user-plus" label="Adicionar" class="cursor-pointer" @click="addUser(null)" />
-    </div> -->
     <UTable v-model:sorting="sorting" :data="data" :columns="columns" :loading="pending" class="flex-1">
       <template #empty>
         <div class="text-center text-gray-400 py-0">Nenhum registro encontrado!</div>

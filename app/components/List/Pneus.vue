@@ -3,6 +3,10 @@ import { h, resolveComponent } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
 import type { Column } from '@tanstack/vue-table'
 
+const props = defineProps({
+  perPage: String || Number || undefined
+})
+
 const UBadge = resolveComponent('UBadge')
 const UButton = resolveComponent('UButton')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
@@ -19,7 +23,7 @@ type Item = {
   situacao: '0' | '1'
 }
 
-const qtdeRows = ref(10)
+const qtdeRows = ref(Number(props.perPage) || 10)
 const termSearch = ref('')
 
 const endpoint = computed(() => `_painel/familias/show?page=1&rows=10`)

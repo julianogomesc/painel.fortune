@@ -10,7 +10,7 @@ const store = useLoginStore()
         {{ store.user?.user?.nome }}
       </strong>
       <p class="max-[321px]:pr-18 pr-38 md:pr-0 lg:pr-46 xl:pr-52 2xl:pr-64 text-blueFortuneDark">
-        O seu acesso é individual, jamais compartilhe seus dados de acesso
+        O seu acesso é individual, jamais compartilhe seus dados de acesso!
       </p>
     </div>
     <div>

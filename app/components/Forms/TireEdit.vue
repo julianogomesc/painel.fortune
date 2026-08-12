@@ -307,40 +307,46 @@ async function deleteImg(id: string | number) {
             <USwitch v-model="state.situacao" :true-value="1" :false-value="0" unchecked-icon="i-lucide-x" checked-icon="i-lucide-check" :ui="{base: 'cursor-pointer'}" />
           </UFormField>
         </div>
-        <div class="col-span-12 my-6">
-          <div class="grid grid-cols-12 gap-4">
-            <!-- {{ image_galery }} -->
-            <div class="col-span-12 md:col-span-3 relative mb-3" v-for="(image, index) in image_galery" :key="index" >
-              <UFormField :label="index == 0 ? 'Imagem Principal': `${index + 1}º Imagem`" name="imagem">
-                  <div class="flex items-center gap-3">
-                      <!-- <img v-if="previewImagem" :src="previewImagem" class="h-12 w-12 object-cover rounded"> -->
-                      <img v-if="isImageObject(image)" :src="image?.imagem" class="max-h-22 rounded-xl w-full object-cover">
-                      <UFileUpload
-                          v-if="!isImageObject(image)"
-                          :model-value="isFile(image) ? image : undefined"
-                          @update:model-value="(f) => image_galery[index] = f ?? ''"
-                          accept=".jpg,.jpeg,.png,image/jpeg,image/png"
-                          placeholder="Selecione uma imagem"
-                          class="w-full"
-                      />
-                  </div>
-              </UFormField>
-              <template v-if="isImageObject(image) && image.id !== null && image.id !== undefined">
-                <UTooltip text="Alterar Imagem">
-                  <UButton icon="i-lucide-refresh-ccw" color="neutral" size="xs" class="absolute top-4 -right-2 cursor-pointer rounded-full" @click="changeImage(index)" />
-                </UTooltip>
-                <UTooltip text="Deletar Imagem">
-                  <UButton icon="i-lucide-trash" color="error" size="xs" class="absolute top-11 -right-2 cursor-pointer rounded-full" @click="deleteImg(image.id)" />
-                </UTooltip>
-              </template>
-
-              <UButton v-if="!isImageObject(image)" icon="i-lucide-trash" color="error" size="xs" class="absolute top-11 -right-2 cursor-pointer rounded-full" @click="delImageGalerie(index)" />
+        <div class="col-span-12 mt-6">
+          <UCard>
+            <div class="grid grid-cols-12 gap-4">
+              <div class="col-span-12 md:col-span-3 relative mb-3" v-for="(image, index) in image_galery" :key="index" >
+                <UFormField :label="index == 0 ? 'Imagem Principal': `${index + 1}º Imagem`" name="imagem">
+                    <div class="flex items-center gap-3">
+                        <!-- <img v-if="previewImagem" :src="previewImagem" class="h-12 w-12 object-cover rounded"> -->
+                        <img v-if="isImageObject(image)" :src="image?.imagem" class="max-h-22 rounded-xl w-full object-cover">
+                        <UFileUpload
+                            v-if="!isImageObject(image)"
+                            :model-value="isFile(image) ? image : undefined"
+                            @update:model-value="(f) => image_galery[index] = f ?? ''"
+                            accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                            placeholder="Selecione uma imagem"
+                            class="w-full"
+                        />
+                    </div>
+                </UFormField>
+                <template v-if="isImageObject(image) && image.id !== null && image.id !== undefined">
+                  <UTooltip text="Alterar Imagem">
+                    <UButton icon="i-lucide-refresh-ccw" color="neutral" size="xs" class="absolute top-4 -right-2 cursor-pointer rounded-full" @click="changeImage(index)" />
+                  </UTooltip>
+                  <UTooltip text="Deletar Imagem">
+                    <UButton icon="i-lucide-trash" color="error" size="xs" class="absolute top-11 -right-2 cursor-pointer rounded-full" @click="deleteImg(image.id)" />
+                  </UTooltip>
+                </template>
+  
+                <UButton v-if="!isImageObject(image)" icon="i-lucide-trash" color="error" size="xs" class="absolute top-11 -right-2 cursor-pointer rounded-full" @click="delImageGalerie(index)" />
+              </div>
+              <div class="col-span-12 md:col-span-3 bg-blueFortune rounded-lg justify-center align-items-center flex">
+                <UButton label="ADICIONAR IMAGEM" size="sm" color="white" :ui="{base: 'cursor-pointer min-h-24'}" @click="addImageGalerie" />
+              </div>
             </div>
-            <div class="col-span-12 md:col-span-3 bg-blueFortune rounded-lg justify-center align-items-center flex">
-              <UButton label="ADICIONAR IMAGEM" size="sm" color="white" :ui="{base: 'cursor-pointer min-h-24'}" @click="addImageGalerie" />
-            </div>
-          </div>
+          </UCard>
         <!-- <pre>{{ state }}</pre> -->
+        </div>
+        <div class="col-span-12 my-3">
+          <UCard>
+            <ListMedidas :inside="true" :id-familia="Array.isArray(route.params.id) ? route.params.id[0] : route.params.id" />
+          </UCard>
         </div>
         <div class="col-span-12 text-right">
             <UButton type="submit" :loading="pending" :ui="{base: 'cursor-pointer py-2.5 px-5'}">

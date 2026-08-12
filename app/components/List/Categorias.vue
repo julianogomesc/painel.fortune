@@ -1,14 +1,12 @@
 <script setup lang="ts">
+// IMPORTS
 import { h, resolveComponent } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
 import type { Column } from '@tanstack/vue-table'
+import ConfirmModal from '~/components/ConfirmModal.vue'
 
-const UBadge = resolveComponent('UBadge')
-const UButton = resolveComponent('UButton')
-const UDropdownMenu = resolveComponent('UDropdownMenu')
-const UAvatarGroup = resolveComponent('UAvatarGroup')
-const UAvatar = resolveComponent('UAvatar')
 
+// TYPES
 type Categorias = {
   id: string | number
   imagem?: string
@@ -18,11 +16,56 @@ type Categorias = {
   situacao: '0' | '1'
 }
 
+
+// RESOLVERS COMPONENTS
+const UBadge = resolveComponent('UBadge')
+const UButton = resolveComponent('UButton')
+const UDropdownMenu = resolveComponent('UDropdownMenu')
+const UAvatarGroup = resolveComponent('UAvatarGroup')
+const UAvatar = resolveComponent('UAvatar')
+
+
+// ESTADOS REATIVOS
 const qtdeRows = ref(10)
 const termSearch = ref('')
+const searchData = ref<Categorias[]>([])
+const sorting = ref([
+  {
+    id: 'nome',
+    desc: false
+  }
+])
 
+
+// COMPOSABLES
+const overlay = useOverlay()
+const confirmModal = overlay.create(ConfirmModal)
+const toast = useToast()
 const endpoint = computed(() => `_painel/categorias/show`)
+const { fetchResult, pending, result, page, rows, total } = useApiRequestsPaginated(endpoint, qtdeRows.value)
 
+
+// COMPUTEDS
+const data = computed<Categorias[]>(() => {
+  if (termSearch.value.trim()) {
+    return searchData.value
+  }
+
+  return result.value as Categorias[]
+})
+
+
+// MOUNTED
+onMounted(() => {
+  fetchResult()
+})
+
+
+// WATCHERS
+watch(page, () => fetchResult())
+
+
+// FUNÇÕES
 function handleSearch(value: string) {
   termSearch.value = value
 
@@ -34,23 +77,6 @@ function handleSearch(value: string) {
 
   void searchCategories(value)
 }
-
-const { fetchResult, pending, result, page, rows, total } = useApiRequestsPaginated(endpoint, qtdeRows.value)
-
-const searchData = ref<Categorias[]>([])
-const data = computed<Categorias[]>(() => {
-  if (termSearch.value.trim()) {
-    return searchData.value
-  }
-
-  return result.value as Categorias[]
-})
-
-watch(page, () => fetchResult())
-
-onMounted(() => {
-  fetchResult()
-})
 
 const columns: TableColumn<Categorias>[] = [
   {
@@ -110,7 +136,7 @@ const columns: TableColumn<Categorias>[] = [
             icon: 'i-lucide-trash-2',
             color: 'error' as const,
             onSelect: () => {
-              deleteBanner(row.original.id)
+              deleteCategoria(row.original.id)
             }
           }
         ]
@@ -125,12 +151,7 @@ const columns: TableColumn<Categorias>[] = [
   }
 ]
 
-import ConfirmModal from '~/components/ConfirmModal.vue'
-const overlay = useOverlay()
-const confirmModal = overlay.create(ConfirmModal)
-const toast = useToast()
-
-async function deleteBanner(id: string | number) {
+async function deleteCategoria(id: string | number) {
   const ok = await confirmModal.open({
     title: 'Excluir Categoria',
     description: 'Deseja realmente excluir esta categoria?'
@@ -223,13 +244,6 @@ async function searchCategories(term = termSearch.value.trim()) {
   const payload = searchResult.value as { data?: Categorias[] } | Categorias[]
   searchData.value = Array.isArray(payload) ? payload : payload?.data ?? []
 }
-
-const sorting = ref([
-  {
-    id: 'nome',
-    desc: false
-  }
-])
 </script>
 
 <template>

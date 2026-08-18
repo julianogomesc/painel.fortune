@@ -5,11 +5,17 @@ export default defineNuxtConfig({
   ssr: false,
   devtools: { enabled: true },
   app: {
+    baseURL: '/painelfortune/',
     head: {
       // script: [
       //   { src: 'https://www.google.com/recaptcha/api.js?render=explicit', async: true, defer: true }
       // ],
       viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
+    }
+  },
+  nitro: {
+    output: {
+      publicDir: 'dist/public'
     }
   },
   modules: ['@nuxt/ui', '@nuxt/icon', '@pinia/nuxt', 'pinia-plugin-persistedstate/nuxt'],

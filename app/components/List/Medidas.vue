@@ -34,7 +34,7 @@ type Item = {
   eps?: string
   rr?: string
   velocidade?: string
-  situacao?: '0' | '1'
+  situacao?: '0' | '1' | '2'
 }
 
 const qtdeRows = ref(Number(props.perPage) || 10)
@@ -154,12 +154,13 @@ const columns: TableColumn<Item>[] = [
     header: ({ column }) => getHeader(column, 'STATUS'),
     cell: ({ row }) => {
       const color = {
-        1: 'success' as const,
         0: 'error' as const,
+        1: 'success' as const,
+        2: 'warning' as const,
       }[row.getValue('situacao') as string]
 
       return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () =>
-        row.getValue('situacao') == '1' ? 'Ativo' : 'Inativo'
+        row.getValue('situacao') == '1' ? 'Ativo' : row.getValue('situacao') == '0' ? 'Inativo' : 'Em Breve'
       )
     }
   },

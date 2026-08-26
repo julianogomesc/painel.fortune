@@ -1,5 +1,11 @@
 <script setup lang="ts">
 
+const situations = reactive([
+    {label: 'Inativo', value: '0'},
+    {label: 'Ativo', value: '1'},
+    {label: 'Em Breve', value: '2'},
+])
+
 const props = defineProps({
     item: Object
 })
@@ -10,7 +16,7 @@ const emit = defineEmits<{
 
 const { fetchResult: updateSituacao, pending: pendingSituacao } = useApiRequests(`/_painel/produtos/${props.item?.id}`, 'PUT', computed(() => ({ situacao: props.item?.situacao })))
 
-async function onToggle(value: number){
+async function onToggle(value: string){
     if(!props.item) return
     props.item.situacao = value
     await updateSituacao()
@@ -82,7 +88,7 @@ async function onToggle(value: number){
                 Status:
             </div>
             <div class="col-span-2 font-bold flex items-center">
-                <USwitch :model-value="props.item?.situacao" true-value="1" false-value="0" :loading="pendingSituacao" @update:model-value="onToggle" />
+                <USelect :model-value="props.item?.situacao" :items="situations" :loading="pendingSituacao" :disabled="pendingSituacao" @update:model-value="onToggle" class="min-w-30" />
             </div>
         </div>
     </template>

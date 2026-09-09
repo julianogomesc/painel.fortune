@@ -83,6 +83,30 @@ async function onToggle(value: string){
                 {{ props.item?.eps }}
             </div>
         </div>
+        <div class="grid grid-cols-3 gap-4 border-b border-gray-200 py-3 text-sm" v-if="props.item?.lb == '1'">
+            <div class="col-span-1 text-right">
+                Letras Brancas:
+            </div>
+            <div class="col-span-2 font-bold flex items-center">
+                <UBadge variant="solid" :color="props.item?.lb == '1' ? 'success' : 'error'" class="capitalize" :icon="props.item?.lb == '1' ? 'i-lucide-check' : 'i-lucide-x'" size="sm" />
+            </div>
+        </div>
+        <div class="grid grid-cols-3 gap-4 border-b border-gray-200 py-3 text-sm" v-if="props.item?.rf == '1'">
+            <div class="col-span-1 text-right">
+                RunFlat:
+            </div>
+            <div class="col-span-2 font-bold flex items-center">
+                <UBadge variant="solid" :color="props.item?.rf == '1' ? 'success' : 'error'" class="capitalize" :icon="props.item?.rf == '1' ? 'i-lucide-check' : 'i-lucide-x'" size="sm" />
+            </div>
+        </div>
+        <div class="grid grid-cols-3 gap-4 border-b border-gray-200 py-3 text-sm" v-if="props.item?.sf == '1'">
+            <div class="col-span-1 text-right">
+                SilentFoam:
+            </div>
+            <div class="col-span-2 font-bold flex items-center">
+                <UBadge variant="solid" :color="props.item?.sf == '1' ? 'success' : 'error'" class="capitalize" :icon="props.item?.sf == '1' ? 'i-lucide-check' : 'i-lucide-x'" size="sm" />
+            </div>
+        </div>
         <div class="grid grid-cols-3 gap-4 py-3 text-sm">
             <div class="col-span-1 text-right">
                 Status:

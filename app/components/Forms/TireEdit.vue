@@ -77,6 +77,11 @@ const { fetchResult, result, pending, error } = useApiRequests(
   'GET'
 )
 
+const { fetchResult: fetchCategories, result: resultCategories, pending: pendingCategoria, error: errorCategoria } = useApiRequests(
+  `/_painel/categorias`,
+  'GET'
+)
+
 const { fetchResult: submitForm, result: resultForm, pending: pendingForm, error: errorForm } = useApiRequests(
   `/_painel/familias/${route.params.id}`,
   'PUT',
@@ -95,7 +100,13 @@ function updatePreview(file: File | string | undefined, previewRef: Ref<string |
 
 watch(() => image_principal.value, file => updatePreview(file, previewImagem))
 
+
 onMounted(async () => {
+    await fetchCategories()
+    resultCategories.value = resultCategories.value?.map(c => ({
+      ...c,
+      id: Number(c.id)
+    }))
     await fetchResult()
     populateForm()
 })
@@ -244,9 +255,14 @@ async function deleteImg(id: string | number) {
         <div class="col-span-12 mb-1">
             <h2 class="font-bold text-2xl uppercase text-blueFortune">Editar Pneu</h2>
         </div>
-        <div class="col-span-12 md:col-span-9">
+        <div class="col-span-12 md:col-span-6">
             <UFormField label="Título:" name="nome" required>
               <UInput v-model="state.titulo" maxlength="255" placeholder="Nome do pneu" class="w-full" />
+            </UFormField>
+        </div>
+        <div class="col-span-12 md:col-span-3">
+            <UFormField label="Categoria:" name="categoria" required>
+              <USelect v-model="state.categoria_id" :items="resultCategories" label-key="nome" value-key="id" class="w-full" />
             </UFormField>
         </div>
         <div class="col-span-12 md:col-span-3">

@@ -3,7 +3,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   ssr: false,
-  devtools: { enabled: true },
+  devtools: { enabled: false },
   app: {
     baseURL: '/painelfortune/',
     head: {
@@ -22,6 +22,17 @@ export default defineNuxtConfig({
   css: [
     '~/assets/css/main.css'
   ],
+
+  fonts: {
+    providers: {
+      google: false,
+      googleicons: false,
+      bunny: false,
+      fontshare: false,
+      fontsource: false,
+      adobe: false
+    }
+  },
 
   typescript: {
     nodeTsConfig: {

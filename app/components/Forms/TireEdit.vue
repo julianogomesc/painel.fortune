@@ -343,7 +343,7 @@ async function deleteImg(id: string | number) {
                             v-if="!isImageObject(image)"
                             :model-value="isFile(image) ? image : undefined"
                             @update:model-value="(f) => image_galery[index] = f ?? ''"
-                            accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                            accept=".jpg,.jpeg,.png,image/jpeg,image/png,.webp"
                             placeholder="Selecione uma imagem"
                             class="w-full"
                         />

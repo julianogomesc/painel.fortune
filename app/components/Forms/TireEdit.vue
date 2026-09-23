@@ -70,7 +70,7 @@ function isFile(value: unknown): value is File {
   return typeof File !== 'undefined' && value instanceof File
 }
 
-const emit = defineEmits<{ success: [] }>()
+const emit = defineEmits<{ success: [], error: [data: any] }>()
 
 const { fetchResult, result, pending, error } = useApiRequests(
   `/_painel/familias/view/${route.params.id}`,
@@ -171,25 +171,33 @@ function changeImage(index: number){
 
 
 async function onSubmit() {
-   await submitForm() // rota principal de alteração do produto (sempre chamada)
-  if (Object.keys(error.value).length) return
-
+  // Atualização da imagem principal
   if (hasImagePrincipalChanged.value) {
     await fetchImagePrincipal() // rota separada para imagem principal
     if (Object.keys(errorImagePrincipal.value).length) return
   }
-
+  // Atualização do arquivo PDF
   if (hasPdfChanged.value) {
     // alert('deve subir o pdf')
     await fetchPdf() // rota separada para pdf
     if (Object.keys(errorPdf.value).length) return
   }
-
+  // Atualização das imagens do produto
   if (hasGaleryChanged.value) {
     await fetchGalery() // rota separada para galeria
-    if (Object.keys(errorGalery.value).length) return
+    if (Object.keys(errorGalery.value).length) {
+      emit('error', errorGalery.value)
+    }
   }
-  if (!Object.keys(error.value).length) {
+  // Atualização do Produto
+  await submitForm() 
+  if(Object.keys(errorForm.value).length) {
+    emit('error', errorForm.value)
+    await fetchResult()
+   populateForm()
+   return
+  }
+  if (!Object.keys(errorForm.value).length) {
     await fetchResult()
     populateForm()
     emit('success')

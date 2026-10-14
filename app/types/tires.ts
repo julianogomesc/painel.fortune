@@ -1,0 +1,15 @@
+export interface itemToDuplicate{
+  id: number | string,
+  categoria_id: number | string,
+  codigo: number | string,
+  descricao?: string,
+  indicacao?: string,
+  pdf?: string,
+  uso_frotas?: string | number,
+  uso_comercial?: string | number,
+  uso_pessoal?: string | number,
+  categoria_nome?: string,
+  situacao?: string | number,
+  titulo?: string,
+  slug?: string,
+}

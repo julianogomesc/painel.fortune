@@ -1,4 +1,6 @@
-export const useApiRequests = (endpoint: Ref<string> | string, method: string | Ref<string>, body?: Record<string, unknown> | Ref<Record<string, unknown>> | FormData, typeSend: 'formdata' | 'none' = 'none', auth: boolean = true) => {
+import type { itemToDuplicate } from '@/types/tires'
+
+export const useApiRequests = (endpoint: Ref<string> | string, method: string | Ref<string>, body?: Record<string, unknown> | itemToDuplicate | Ref<Record<string, unknown>> | FormData, typeSend: 'formdata' | 'none' = 'none', auth: boolean = true) => {
     const config = useRuntimeConfig()
     const store = useLoginStore()
 
@@ -14,6 +16,8 @@ export const useApiRequests = (endpoint: Ref<string> | string, method: string | 
         await fetchResult()
         return    
     }
+
+    
 
     const fetchResult = async () => {
         pending.value = true
@@ -67,8 +71,61 @@ export const useApiRequests = (endpoint: Ref<string> | string, method: string | 
         }
     }
 
+
+    const DuplicateItem = async () => {
+        pending.value = true
+        error.value = {}
+
+        const fd = new FormData()
+        if (typeSend == 'formdata') {
+            const payload = unref(body as Record<string, unknown> | Ref<Record<string, unknown>> | undefined)
+
+            if (payload && typeof payload === 'object' && !(payload instanceof FormData)) {
+                // for (const [key, value] of Object.entries(payload)) {
+                //     if (value != null && value != undefined) {
+                //         fd.append(key, value instanceof Blob ? value : String(value))
+                //     }
+                // }
+                for (const [key, value] of Object.entries(payload)) {
+                    const val = unref(value as File | string | undefined)
+                    if (val != null) {
+                        fd.append(key, val instanceof Blob ? val : String(val))
+                    }
+                }
+
+            }
+        }
+
+        const now = new Date().getMilliseconds()
+
+        try {
+            const methodVal = unref(method).toUpperCase() as methodsPermited
+            const { data, error: fetchError } = await useFetch(unref(endpoint), {
+                key: `${txt.value.slice(0, 4)}-${methodVal.toLowerCase()}-${now}`,
+                baseURL: config.public.apiBase,
+                method: 'POST',
+                headers: auth && store.user.token ? {
+                    Authorization: `Bearer ${store.user.token}`
+                } : {},
+                body: methodVal == 'GET' ? undefined : typeSend == 'formdata' ? fd : body,
+                watch: false
+            })
+            result.value = data.value || {}
+            if (fetchError.value) {
+                error.value = toRaw(fetchError.value.data.errors)
+            }
+        }
+        catch (e) {
+            // console.log(e)
+            error.value = e || { title: 'Erro Inesperado no RQ Front' }
+        }
+        finally {
+            pending.value = false
+        }
+    }
+
     return {
-        fetchResult, userSaveImage, pending, error, result
+        fetchResult, userSaveImage, DuplicateItem, pending, error, result
     }
 
 }

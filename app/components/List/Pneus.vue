@@ -2,6 +2,7 @@
 import { h, resolveComponent } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
 import type { Column } from '@tanstack/vue-table'
+import type { itemToDuplicate } from '@/types/tires'
 
 const props = defineProps({
   perPage: String || Number || undefined
@@ -129,14 +130,14 @@ const columns: TableColumn<Item>[] = [
               navigateTo(`/produtos/pneus/editar/${row.original.id}`)
             }
           },
-          // {
-          //   label: 'Excluir',
-          //   icon: 'i-lucide-trash-2',
-          //   color: 'error' as const,
-          //   onSelect: () => {
-          //     deleteUser(row.original.id, row.original.titulo)
-          //   }
-          // }
+          {
+            label: 'Duplicar',
+            icon: 'i-lucide-copy-check',
+            color: 'info' as const,
+            onSelect: () => {
+              duplicateItem(row.original)
+            }
+          }
         ]
       },
       () => h(UButton, {
@@ -171,19 +172,20 @@ async function addUser(item: Object | null) {
   }
 }
 
-async function deleteUser(id: string | number, name: string) {
+async function duplicateItem(item: itemToDuplicate) {
   const ok = await confirmModal.open({
-    title: `Excluir: ${name}`,
-    description: 'Deseja realmente excluir este usuário?'
+    title: `Duplicar: ${item.titulo}`,
+    description: 'Deseja realmente duplicar esse ítem?'
   })
 
   if (ok) {
-    const { fetchResult: fetchDelete, pending: pendingDelete } = useApiRequests(`/_painel/users/${id}`, 'DELETE')
-    await fetchDelete()
-    if (!pendingDelete.value) {
+    item.titulo = item.titulo + ' - Duplicado'
+    const { DuplicateItem, pending: pendingDuplicate } = useApiRequests(`_painel/familias/duplicar/${item.id}`, 'POST', item, 'formdata')
+    await DuplicateItem()
+    if (!pendingDuplicate.value) {
       toast.add({
         title: 'Sucesso',
-        description: 'Usuário deletado com sucesso!',
+        description: 'Item duplicado com sucesso!',
         color: 'success',
         duration: 1300,
       })
